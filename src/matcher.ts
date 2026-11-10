@@ -132,6 +132,19 @@ export interface AnnotateResult {
   truncated: boolean;
 }
 
+/** Options for {@link FlexiMatcher.annotateBatch}.  A batch cannot share a store. */
+export interface BatchAnnotateOptions extends Omit<AnnotateOptions, "store"> {
+  /** Aggregate annotation counts by type.  Defaults to `true`. */
+  collectUsage?: boolean;
+}
+
+export interface BatchAnnotateResult {
+  /** One result per input text, in input order. */
+  results: AnnotateResult[];
+  /** Annotation counts by type across the batch; empty when disabled. */
+  usage: Record<string, number>;
+}
+
 /** One resolved chunk of a compiled pattern. */
 export interface CompiledPart {
   /** The original chunk, e.g. `[i:pear]`. */
@@ -710,6 +723,33 @@ export class FlexiMatcher {
       errors,
       truncated: truncated || store.truncated,
     };
+  }
+
+  /**
+   * Annotate several texts with the same rules, in one call.
+   *
+   * Each text gets its own store, so the results are independent; the aggregate
+   * `usage` map counts annotations by type across the batch and is the metric
+   * for "which annotators fired".  It is deliberately a thin loop over
+   * {@link annotate}: the core remains synchronous and per-text.
+   */
+  annotateBatch(
+    texts: readonly string[],
+    options: BatchAnnotateOptions,
+  ): BatchAnnotateResult {
+    const results: AnnotateResult[] = [];
+    const usage: Record<string, number> = {};
+    const collectUsage = options.collectUsage ?? true;
+    for (const text of texts) {
+      const result = this.annotate(text, options);
+      results.push(result);
+      if (collectUsage) {
+        for (const [type, count] of Object.entries(result.store.usage())) {
+          usage[type] = (usage[type] ?? 0) + count;
+        }
+      }
+    }
+    return { results, usage };
   }
 
   /**

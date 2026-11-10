@@ -311,6 +311,27 @@ result.errors;       // [{ rule, error }] when onError is "collect"
 - `fullyAnnotate` defaults to `true` for annotate-only runs.
 - Use `matches` for multi-chunk patterns and interpretations.
 
+### Batches and rule usage
+
+`annotateBatch` runs the same rules over several independent texts and
+aggregates the annotations by type.  Each text gets its own store; the `usage`
+map answers "which annotators fired, and how often" without the caller
+reimplementing the loop:
+
+```ts
+const batch = matcher.annotateBatch(["Le case", "Il cane"], {
+  rules: ["[it-article]", "it-noun"],
+  onError: "collect",
+});
+
+batch.results[0]?.store.ofType("[it-noun]");
+batch.usage["[it-noun]"]; // annotations of that type across the batch
+```
+
+`collectUsage: false` skips the map.  `AnnotationStore.usage()` exposes the
+same counts for a single store, including tag annotations added by the tag
+closure.
+
 ## Rules and custom annotators
 
 A rule implements `annotate(text, annotator)`.  It adds spans through the

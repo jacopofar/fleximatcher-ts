@@ -625,6 +625,7 @@ a different text or an unprefetched parameter.
 | `matches(text, pattern, options?)` | match and return a `MatchResult` |
 | `contains(text, pattern)` | whether any substring matches |
 | `annotate(text, { rules })` | run annotator rules without a pattern |
+| `annotateBatch(texts, { rules })` | annotate several texts; aggregate annotation usage by type |
 | `compile(pattern)` | resolve a pattern once and reuse it |
 | `generateSample(pattern)` | build a sample string where possible |
 | `bind(name, factory)`, `unbind(name)` | manage custom rules |
@@ -647,6 +648,18 @@ const result = matcher.annotate("Le case", {
 
 result.annotations; // every annotation from every rule
 result.errors;      // { rule, error } entries when onError is "collect"
+```
+
+`annotateBatch` runs the same rules over a list of independent texts and
+aggregates the annotations by type.  The `usage` map is the metric for "which
+annotators fired" on a batch; each text still gets its own store.
+
+```ts
+const batch = matcher.annotateBatch(["Le case", "Il cane"], {
+  rules: ["[it-article]", "it-noun"],
+});
+batch.results[0]?.store; // the first text's annotations
+batch.usage["[it-noun]"]; // how many noun annotations across the batch
 ```
 
 It shares one store across the rules and runs each with `matchWhole: false`.

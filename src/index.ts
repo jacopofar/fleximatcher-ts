@@ -84,6 +84,8 @@ export {
   type AnnotateOptions,
   type AnnotateResult,
   type AnnotateRule,
+  type BatchAnnotateOptions,
+  type BatchAnnotateResult,
   type CompiledPart,
   type FlexiMatcherOptions,
   type InternalMatchOptions,

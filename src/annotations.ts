@@ -367,6 +367,15 @@ export class AnnotationStore implements Iterable<Annotation> {
     return (this.byStart.get(start) ?? []) as readonly Annotation<TData>[];
   }
 
+  /** Count annotations by type, for batch and rule-usage metrics. */
+  usage(): Record<string, number> {
+    const counts: Record<string, number> = {};
+    for (const [type, annotations] of this.byType) {
+      counts[type] = annotations.length;
+    }
+    return counts;
+  }
+
   /** Return every annotation whose type is exactly `type`. */
   ofType<TData = unknown>(type: string): readonly Annotation<TData>[] {
     return (this.byType.get(type) ?? []) as readonly Annotation<TData>[];
