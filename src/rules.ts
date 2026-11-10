@@ -37,6 +37,14 @@ export interface RuleFactory {
    * rules that only inspect the text should leave this false.
    */
   usesTags?: boolean;
+  /**
+   * Set this to `true` when the sequence matcher may skip this chunk.
+   *
+   * The built-in `optional` factory uses it.  A skipped chunk is simply absent
+   * from the matched sequence, so it must not be combined with positional
+   * `${N}` annotation templates.
+   */
+  optional?: boolean;
 }
 
 function sanitizeRegexFlags(flags: string): string {
@@ -482,6 +490,164 @@ export class RepeatRule implements Rule {
   }
 }
 
+/**
+ * A pattern that may be present zero or one time.
+ *
+ * The rule annotates every span the inner pattern matches.  The sequence
+ * matcher, not the rule, implements the zero case: a chunk whose factory sets
+ * `optional: true` may be skipped, so no zero-length annotation is needed.
+ *
+ * ```ts
+ * matcher.matches("ac", "[i:a] [optional:[i:b]] [i:c]").matching;  // true
+ * matcher.matches("abc", "[i:a] [optional:[i:b]] [i:c]").matching; // true
+ * ```
+ */
+export class OptionalRule implements Rule {
+  readonly pattern: string;
+  private readonly compiled: CompiledPattern;
+
+  constructor(parameter: string, matcher: FlexiMatcher) {
+    if (!parameter.trim()) {
+      throw new RuleError("The optional rule needs a pattern");
+    }
+    this.pattern = parameter;
+    this.compiled = matcher.compile(parameter);
+  }
+
+  annotate(text: string, annotator: Annotator): boolean {
+    annotator.budget.check();
+    const result = annotator.match(text, this.compiled, {
+      matchWhole: false,
+      populateResult: true,
+      fullyAnnotate: false,
+    });
+
+    const spans = new Map<string, [number, number]>();
+    for (const sequence of result.interpretations ?? []) {
+      if (sequence.length === 0) {
+        continue;
+      }
+      const start = sequence[0]!.start;
+      const end = sequence[sequence.length - 1]!.end;
+      if (end <= start) {
+        continue;
+      }
+      spans.set(`${start}:${end}`, [start, end]);
+    }
+    for (const [start, end] of spans.values()) {
+      annotator.add(start, end);
+    }
+    return false;
+  }
+
+  toString(): string {
+    return `OptionalRule(${JSON.stringify(this.pattern)})`;
+  }
+}
+
+/** One or more whitespace characters, annotated as one span. */
+export class WhitespaceRule implements Rule {
+  annotate(text: string, annotator: Annotator): boolean {
+    const pattern = /\s+/gu;
+    for (const match of text.matchAll(pattern)) {
+      const start = match.index ?? 0;
+      annotator.add(start, start + match[0].length);
+    }
+    return text.length > 0 && text.trim().length === 0;
+  }
+
+  toString(): string {
+    return "WhitespaceRule()";
+  }
+}
+
+const WORD_RUN =
+  /\p{L}[\p{L}\p{M}]*(?:['\u2018\u2019\u02bc][\p{L}\p{M}]*)*'?/gu;
+const WORD_APOSTROPHES = new Set(["'", "\u2018", "\u2019", "\u02bc"]);
+
+function normalizeWord(text: string): string {
+  return text
+    .normalize("NFC")
+    .replace(/[\u2018\u2019\u02bc]/g, "'")
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * A whole-word, case-insensitive literal.
+ *
+ * Unlike `[i:text]`, which matches any substring, `[word:text]` compares
+ * Unicode word tokens, so `[word:non]` does not match inside *nonostante*.
+ * Italian elisions are exposed both as the whole run and as their
+ * apostrophe-separated pieces, matching the Wiktionary tokenizer.
+ */
+export class WordRule implements Rule {
+  readonly text: string;
+  private readonly target: string;
+
+  constructor(text: string) {
+    if (!text) {
+      throw new RuleError("A word rule cannot be empty");
+    }
+    if (/\s/.test(text)) {
+      throw new RuleError(
+        `A word rule expects a single word, got ${JSON.stringify(text)}`,
+      );
+    }
+    if (!/\p{L}/u.test(text)) {
+      throw new RuleError(
+        `A word rule expects at least one letter, got ${JSON.stringify(text)}`,
+      );
+    }
+    this.text = text;
+    this.target = normalizeWord(text);
+  }
+
+  annotate(text: string, annotator: Annotator): boolean {
+    let whole = false;
+    for (const match of text.matchAll(WORD_RUN)) {
+      const start = match.index ?? 0;
+      const end = start + match[0].length;
+
+      const candidates: Array<[number, number]> = [[start, end]];
+      let segmentStart = start;
+      for (let index = start; index < end; index += 1) {
+        if (WORD_APOSTROPHES.has(text[index]!)) {
+          candidates.push([segmentStart, index + 1]);
+          segmentStart = index + 1;
+        }
+      }
+      if (segmentStart < end) {
+        candidates.push([segmentStart, end]);
+      }
+
+      const seen = new Set<string>();
+      for (const [candidateStart, candidateEnd] of candidates) {
+        if (candidateEnd <= candidateStart) {
+          continue;
+        }
+        const key = `${candidateStart}:${candidateEnd}`;
+        if (seen.has(key)) {
+          continue;
+        }
+        seen.add(key);
+        if (normalizeWord(text.slice(candidateStart, candidateEnd)) !== this.target) {
+          continue;
+        }
+        annotator.add(candidateStart, candidateEnd);
+        if (candidateStart === 0 && candidateEnd === text.length) {
+          whole = true;
+        }
+      }
+    }
+    return whole;
+  }
+
+  toString(): string {
+    return `WordRule(${JSON.stringify(this.text)})`;
+  }
+}
+
 export interface RegexRuleFactoryOptions {
   /** Flags passed to `RegExp`; `g` and `y` are ignored. Defaults to `"u"`. */
   flags?: string;
@@ -617,6 +783,55 @@ export class RepeatRuleFactory implements RuleFactory {
   generateSample(parameter: string): string | null {
     const sample = this.matcher.generateSample(parameter);
     return sample === null ? null : `${sample}${sample}`;
+  }
+}
+
+/** Factory for the built-in `optional` combinator. */
+export class OptionalRuleFactory implements RuleFactory {
+  readonly optional = true;
+  private readonly matcher: FlexiMatcher;
+
+  constructor(matcher: FlexiMatcher) {
+    this.matcher = matcher;
+  }
+
+  getRule(parameter: string): OptionalRule {
+    return new OptionalRule(parameter, this.matcher);
+  }
+
+  generateSample(parameter: string): string | null {
+    return this.matcher.generateSample(parameter);
+  }
+}
+
+/** Factory for the built-in `ws` rule. */
+export class WhitespaceRuleFactory implements RuleFactory {
+  private readonly rule = new WhitespaceRule();
+
+  getRule(): WhitespaceRule {
+    return this.rule;
+  }
+
+  generateSample(): string {
+    return " ";
+  }
+}
+
+/** Factory for the built-in `word` rule. */
+export class WordRuleFactory implements RuleFactory {
+  private readonly cache = new Map<string, WordRule>();
+
+  getRule(parameter: string): WordRule {
+    let rule = this.cache.get(parameter);
+    if (rule === undefined) {
+      rule = new WordRule(parameter);
+      this.cache.set(parameter, rule);
+    }
+    return rule;
+  }
+
+  generateSample(parameter: string): string {
+    return parameter;
   }
 }
 

@@ -26,11 +26,14 @@ import {
 import {
   InsensitiveCaseRuleFactory,
   MultiRuleFactory,
+  OptionalRuleFactory,
   OrRuleFactory,
   PlainTextRule,
   RegexRuleFactory,
   RepeatRuleFactory,
   SingleCharRuleFactory,
+  WhitespaceRuleFactory,
+  WordRuleFactory,
   type Rule,
   type RuleFactory,
 } from "./rules.js";
@@ -141,6 +144,8 @@ export interface CompiledPart {
   factory: RuleFactory | null;
   /** The rule instance, refreshed if the binding changes. */
   rule: Rule;
+  /** Whether the sequence matcher may skip this chunk. */
+  optional: boolean;
 }
 
 /**
@@ -205,6 +210,7 @@ export class CompiledPattern {
       if (factory !== part.factory) {
         part.factory = factory;
         part.rule = factory.getRule(part.parameter);
+        part.optional = factory.optional === true;
       }
     }
     this.bindingsVersion = this.matcher._bindingsVersion;
@@ -233,6 +239,21 @@ export class CompiledPattern {
 function annotatorPattern(rule: string): string {
   const trimmed = rule.trim();
   return trimmed.startsWith("[") ? trimmed : `[${trimmed}]`;
+}
+
+/** The indices of the parts the sequence matcher may skip, or undefined. */
+function optionalPartIndices(
+  parts: readonly CompiledPart[],
+): ReadonlySet<number> | undefined {
+  let optional: Set<number> | undefined;
+  parts.forEach((part, index) => {
+    if (!part.optional) {
+      return;
+    }
+    optional ??= new Set<number>();
+    optional.add(index);
+  });
+  return optional;
 }
 
 /**
@@ -289,6 +310,9 @@ export class FlexiMatcher {
     this.bind("multi", new MultiRuleFactory(this));
     this.bind("or", new OrRuleFactory(this));
     this.bind("repeat", new RepeatRuleFactory(this));
+    this.bind("optional", new OptionalRuleFactory(this));
+    this.bind("ws", new WhitespaceRuleFactory());
+    this.bind("word", new WordRuleFactory());
     this.bind("char", new SingleCharRuleFactory());
     this.bind("tag", this.tagFactory);
 
@@ -470,6 +494,7 @@ export class FlexiMatcher {
           parameter: "",
           factory: null,
           rule: new PlainTextRule(chunk),
+          optional: false,
         };
       }
 
@@ -487,6 +512,7 @@ export class FlexiMatcher {
         parameter: parameterText,
         factory,
         rule: factory.getRule(parameterText),
+        optional: factory.optional === true,
       };
     });
   }
@@ -797,6 +823,7 @@ export class FlexiMatcher {
       populateResult: options.populateResult,
       budget: options.budget,
       maxInterpretations: options.budget.maxInterpretations,
+      optional: optionalPartIndices(parts),
     });
     const truncated = options.store.truncated || checked.truncated === true;
     return new MatchResult(checked.matching, {

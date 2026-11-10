@@ -15,7 +15,7 @@ import {
   PatternError,
   UnknownTagError,
 } from "./errors.js";
-import { isRuleChunk, parameter, ruleName, splitPattern, usedTags } from "./expressions.js";
+import { isRuleChunk, parameter, ruleName, splitPattern, usedTags, usesOptional } from "./expressions.js";
 import type { CompiledPattern, FlexiMatcher } from "./matcher.js";
 import type { Rule, RuleFactory } from "./rules.js";
 import {
@@ -46,6 +46,16 @@ export class RuleDefinition<TData = unknown> {
     const chunks = splitPattern(pattern);
     if (chunks.length === 0) {
       throw new PatternError("A tag production cannot be empty");
+    }
+    if (
+      usesOptional(pattern) &&
+      options.template !== undefined &&
+      options.template !== null &&
+      typeof options.template !== "function"
+    ) {
+      throw new PatternError(
+        `A tag production that uses [optional:...] must use a function template: a skipped optional chunk is absent from the matched sequence, so positional placeholders would refer to the wrong annotation (pattern: ${JSON.stringify(pattern)})`,
+      );
     }
     this.pattern = pattern;
     this.identifier = options.identifier ?? null;
@@ -417,7 +427,7 @@ export class TagRuleFactory implements RuleFactory {
       if (name === "tag") {
         continue;
       }
-      if (name === "multi" || name === "or" || name === "repeat") {
+      if (name === "multi" || name === "or" || name === "repeat" || name === "optional") {
         if (this.patternUsesDynamicTags(parameter(chunk))) {
           return true;
         }

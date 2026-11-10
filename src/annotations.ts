@@ -125,6 +125,11 @@ export interface CheckSequenceOptions {
   budget?: Budget;
   /** Maximum number of interpretation sequences to retain. */
   maxInterpretations?: number;
+  /**
+   * Indices of parts that may be skipped.  A skipped part adds no annotation
+   * to the interpretation; the sequence simply continues at the same position.
+   */
+  optional?: ReadonlySet<number>;
 }
 
 export interface MissingPart {
@@ -415,6 +420,7 @@ export class AnnotationStore implements Iterable<Annotation> {
     options: CheckSequenceOptions,
   ): CheckSequenceResult {
     const { matchWhole, populateResult, budget, maxInterpretations } = options;
+    const optionalParts = options.optional;
     let truncated = false;
     let ticks = 0;
     const touch = (): void => {
@@ -463,6 +469,37 @@ export class AnnotationStore implements Iterable<Annotation> {
 
       for (const start of startPositions) {
         touch();
+        if (optionalParts?.has(partIndex) === true) {
+          // The zero-occurrence path: keep the sequences built so far and
+          // continue at the same position.
+          newPositions.add(start);
+          if (populateResult) {
+            const target = newCandidates as Map<number, Map<string, Annotation[]>>;
+            let bucket = target.get(start);
+            if (bucket === undefined) {
+              bucket = new Map();
+              target.set(start, bucket);
+            }
+            if (firstStep) {
+              if (canAdd()) {
+                const sequence: Annotation[] = [];
+                bucket.set(sequenceKey(sequence), sequence);
+                stageCount += 1;
+              }
+            } else {
+              const previous = (candidates as CandidateMap).get(start);
+              if (previous !== undefined) {
+                for (const sequence of previous.values()) {
+                  if (!canAdd()) {
+                    break;
+                  }
+                  bucket.set(sequenceKey(sequence), sequence);
+                  stageCount += 1;
+                }
+              }
+            }
+          }
+        }
         for (const annotation of this.byStart.get(start) ?? []) {
           if (annotation.type !== part) {
             continue;

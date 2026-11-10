@@ -420,7 +420,7 @@ API.  An undefined macro throws `UnknownMacroError`; a cycle throws
 
 ## Safe pattern combinators
 
-The core binds two declarative combinators in addition to `multi`.
+The core binds three declarative combinators in addition to `multi`.
 
 ### `or`
 
@@ -458,8 +458,46 @@ Data records the repetition counts that produced each span:
 The default enumeration cap is 16 repetitions.  Rebind `repeat` with
 `new RepeatRuleFactory(matcher, { maxRepetitions: 32 })` if you need more.
 
-Both combinators are safe strings: they are available to TSV rules and the
-server API and never evaluate arbitrary code.
+### `optional`
+
+`optional` wraps a sub-pattern that may occur zero or one time:
+
+```ts
+matcher.matches("a c", "[i:a][ws][optional:[i:b][ws]][i:c]").matching; // true
+matcher.matches("a b c", "[i:a][ws][optional:[i:b][ws]][i:c]").matching; // true
+```
+
+The rule annotates every span the inner pattern matches.  The **sequence
+matcher** implements the zero case: a chunk whose factory sets `optional: true`
+may be skipped, and the interpretation simply continues at the same position.
+This avoids zero-length annotations.
+
+A skipped optional chunk is absent from the matched sequence, so positional
+`${N}` templates in a tag production would refer to the wrong annotation.
+`RuleDefinition` rejects that combination; use a function template instead:
+
+```ts
+matcher.addTagRule("kind", "[i:a][ws][optional:[i:b]]", {
+  identifier: "id_kind",
+  template: ({ sequence }) => ({ parts: sequence.length }),
+});
+```
+
+### `ws` and `word`
+
+`ws` annotates runs of one or more whitespace characters, including newlines.
+`word` is a case-insensitive whole-word literal, so `[word:non]` does not match
+inside *nonostante*.  Italian elisions are exposed as the whole run and as
+their apostrophe-separated pieces.
+
+```ts
+matcher.matches("a\n\tb", "[i:a][ws][i:b]").matching; // true
+matcher.contains("nonostante", "[word:non]"); // false
+matcher.contains("l'uomo", "[word:uomo]"); // true
+```
+
+All three are safe strings: they are available to TSV rules and the server API
+and never evaluate arbitrary code.
 
 ### Rules that read tags
 

@@ -117,6 +117,9 @@ export function parameter(chunk: string): string {
   return separator === -1 ? "" : inner.slice(separator + 1);
 }
 
+/** Combinators whose parameter is itself a pattern. */
+const NESTED_PATTERN_RULES = new Set(["multi", "or", "repeat", "optional"]);
+
 /**
  * Return the names of the tags used by `pattern`, including nested ones.
  *
@@ -137,11 +140,39 @@ export function usedTags(pattern: string): Set<string> {
     }
     if (name === "tag") {
       result.add(parameter(chunk));
-    } else if (name === "multi" || name === "or" || name === "repeat") {
+    } else if (NESTED_PATTERN_RULES.has(name)) {
       for (const tag of usedTags(parameter(chunk))) {
         result.add(tag);
       }
     }
   }
   return result;
+}
+
+/**
+ * Whether `pattern` contains an `[optional:...]` chunk, including nested ones.
+ *
+ * Tag productions that use optional chunks cannot use positional `${N}`
+ * templates: a skipped chunk is absent from the matched sequence, so indices
+ * would silently refer to the wrong annotation.
+ */
+export function usesOptional(pattern: string): boolean {
+  for (const chunk of splitPattern(pattern)) {
+    if (!isRuleChunk(chunk)) {
+      continue;
+    }
+    let name: string;
+    try {
+      name = ruleName(chunk);
+    } catch {
+      continue;
+    }
+    if (name === "optional") {
+      return true;
+    }
+    if (NESTED_PATTERN_RULES.has(name) && usesOptional(parameter(chunk))) {
+      return true;
+    }
+  }
+  return false;
 }

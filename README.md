@@ -148,6 +148,9 @@ Square brackets may nest; `splitPattern` keeps nested chunks together.
 | `[multi:...]` | intersection of several sub-patterns |
 | `[or:a|b]` | union of several alternatives |
 | `[repeat:pattern]` | one or more contiguous repetitions |
+| `[optional:pattern]` | zero or one occurrence of a pattern |
+| `[ws]` | one or more whitespace characters |
+| `[word:text]` | a whole word, case-insensitive |
 | `[char:code]` | one Unicode code point, decimal or `0x` hex |
 | `[tag:name]` | a previously defined tag (a grammar production) |
 
@@ -229,6 +232,53 @@ Annotation data lists the repetition counts that produced each span:
 
 The default enumeration cap is 16 repetitions; rebind `repeat` with
 `RepeatRuleFactory({ maxRepetitions })` to change it.
+
+### `optional`
+
+`optional` wraps a sub-pattern that may occur zero or one time:
+
+```ts
+matcher.matches("a c", "[i:a][ws][optional:[i:b][ws]][i:c]").matching; // true
+matcher.matches("a b c", "[i:a][ws][optional:[i:b][ws]][i:c]").matching; // true
+```
+
+The sequence matcher keeps both paths: skip the chunk, or consume a span it
+annotated.  No zero-length annotations are created.  The zero path is simply
+absent from the interpretation, so a tag production that uses `optional`
+cannot use positional `${N}` templates — use a function template instead:
+
+```ts
+matcher.addTagRule("kind", "[i:a][ws][optional:[i:b]]", {
+  identifier: "id_kind",
+  template: ({ sequence }) => ({ parts: sequence.length }),
+});
+```
+
+Rebind `optional` with `OptionalRuleFactory(matcher)` if you need a different
+sub-pattern engine, but keep `optional: true` on the factory so the sequence
+matcher knows it may skip the chunk.
+
+### `ws`
+
+`ws` annotates runs of one or more whitespace characters, including newlines:
+
+```ts
+matcher.matches("a   b", "[i:a][ws][i:b]").matching; // true
+matcher.matches("a\n\tb", "[i:a][ws][i:b]").matching; // true
+```
+
+### `word`
+
+`word` is a case-insensitive whole-word literal.  Unlike `[i:text]` it does not
+match substrings, so `[word:non]` does not match inside *nonostante*:
+
+```ts
+matcher.contains("non sono", "[word:non]"); // true
+matcher.contains("nonostante", "[word:non]"); // false
+```
+
+Italian elisions are exposed both as the whole run and as their
+apostrophe-separated pieces: `l'uomo` is `l'uomo`, `l'` and `uomo`.
 
 ### Pattern macros
 

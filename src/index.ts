@@ -75,6 +75,7 @@ export {
   ruleName,
   splitPattern,
   usedTags,
+  usesOptional,
 } from "./expressions.js";
 export {
   CompiledPattern,
@@ -93,6 +94,8 @@ export {
   InsensitiveCaseRuleFactory,
   MultiRule,
   MultiRuleFactory,
+  OptionalRule,
+  OptionalRuleFactory,
   OrRule,
   OrRuleFactory,
   PlainTextRule,
@@ -101,6 +104,10 @@ export {
   RepeatRule,
   RepeatRuleFactory,
   SingleCharRuleFactory,
+  WhitespaceRule,
+  WhitespaceRuleFactory,
+  WordRule,
+  WordRuleFactory,
   type InsensitiveCaseRuleFactoryOptions,
   type RegexRuleFactoryOptions,
   type RepeatRuleOptions,
