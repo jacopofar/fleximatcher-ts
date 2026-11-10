@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit, property and fuzz tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Typecheck playground
+        run: |
+          npm --prefix web/frontend ci
+          npm run web:typecheck
+
+      - name: Build playground
+        run: npm run web:build
+
+      - name: Run examples
+        run: |
+          node examples/annotate.mjs
+          node examples/tag-hierarchy.mjs
+          node examples/agreement.mjs
+
+      - name: Benchmark smoke test
+        env:
+          BENCH_SCALE: 1
+        run: node bench/index.mjs

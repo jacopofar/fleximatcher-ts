@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+
+# Local working notes
+notes.md
+
+# Generated Wiktionary lexicons
+data/
+*.jsonl
+*.jsonl.gz

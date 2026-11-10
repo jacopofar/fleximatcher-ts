@@ -1,0 +1,72 @@
+{
+  "name": "fleximatcher",
+  "version": "0.1.0",
+  "description": "Annotate and bottom-up parse natural language text with composable rules and tags",
+  "license": "MIT",
+  "keywords": [
+    "nlp",
+    "annotator",
+    "parser",
+    "grammar",
+    "pattern-matching",
+    "typescript"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    },
+    "./wiktionary": {
+      "types": "./dist/wiktionary/index.d.ts",
+      "import": "./dist/wiktionary/index.js"
+    },
+    "./wiktionary/browser": {
+      "types": "./dist/wiktionary/browser.d.ts",
+      "import": "./dist/wiktionary/browser.js"
+    }
+  },
+  "bin": {
+    "fleximatcher": "./dist/cli.js",
+    "fleximatcher-wiktionary": "./dist/wiktionary/build.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "build:wiktionary": "npm run build && node dist/wiktionary/build.js",
+    "web:install": "npm --prefix web/frontend install",
+    "web:dev": "npm --prefix web/frontend run dev",
+    "web:build": "npm --prefix web/frontend run build",
+    "web:server": "npm run build && node web/server.mjs",
+    "web:start": "npm run build && npm --prefix web/frontend run build && node web/server.mjs",
+    "web:typecheck": "npm --prefix web/frontend run typecheck",
+    "examples:annotate": "npm run build && node examples/annotate.mjs",
+    "examples:hierarchy": "npm run build && node examples/tag-hierarchy.mjs",
+    "examples:agreement": "npm run build && node examples/agreement.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:fuzz": "vitest run test/fuzz.test.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "bench": "npm run build && node bench/index.mjs",
+    "ci": "npm run typecheck && npm run test && npm run build && npm run web:typecheck && npm run web:build && npm run examples:annotate && npm run examples:hierarchy && npm run examples:agreement",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.1.12"
+  }
+}
