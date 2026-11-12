@@ -43,7 +43,7 @@ console.log(result.interpretations?.[0]?.at(-1)?.data);
 npm install fleximatcher
 ```
 
-Requires Node.js 20 or newer.  The package is ESM-only and ships TypeScript
+Requires Node.js 25 or newer.  The package is ESM-only and ships TypeScript
 declarations.
 
 ## Documentation
@@ -825,7 +825,7 @@ seeded fuzz/property tests and diagnostics.  `npm test` includes
 
 CI lives in `.github/workflows/ci.yml` and runs lint, typecheck, tests, the
 build, the playground typecheck/build, the examples and a benchmark smoke test
-on Node 20.  `npm run ci` runs the same checks locally.
+on Node 25.  `npm run ci` runs the same checks locally.
 
 The code is MIT-licensed; see [LICENSE](./LICENSE).  Generated Wiktionary
 lexicons are derived data and keep their own attribution; see
