@@ -69,7 +69,12 @@ export interface WiktionaryLexiconData {
   words: Record<string, WiktionaryEntryInput[]>;
 }
 
-const MOODS = ["indicative", "subjunctive", "imperative", "conditional"] as const;
+const MOODS = [
+  "indicative",
+  "subjunctive",
+  "imperative",
+  "conditional",
+] as const;
 const TENSES = ["present", "imperfect", "future", "past", "historic"] as const;
 const VERB_FORMS = ["infinitive", "gerund", "participle"] as const;
 const CASES = [
@@ -86,7 +91,10 @@ const CASES = [
   "oblique",
 ] as const;
 
-function firstFeature(features: readonly string[], candidates: readonly string[]): string | undefined {
+function firstFeature(
+  features: readonly string[],
+  candidates: readonly string[],
+): string | undefined {
   for (const candidate of candidates) {
     if (features.includes(candidate)) {
       return candidate;
@@ -144,7 +152,9 @@ export function createWiktionaryEntry(
     throw new TypeError("A Wiktionary lexicon entry needs a word");
   }
   if (!pos) {
-    throw new TypeError(`A Wiktionary lexicon entry for ${JSON.stringify(resolvedWord)} needs a pos`);
+    throw new TypeError(
+      `A Wiktionary lexicon entry for ${JSON.stringify(resolvedWord)} needs a pos`,
+    );
   }
 
   const features = [...new Set(rawFeatures.map(normalizeFeature))].sort();
@@ -156,7 +166,13 @@ export function createWiktionaryEntry(
     gender: deriveGender(features),
     number: deriveNumber(features),
     case: firstFeature(features, CASES),
-    person: normalizePerson(firstFeature(features, ["first-person", "second-person", "third-person"]) ?? ""),
+    person: normalizePerson(
+      firstFeature(features, [
+        "first-person",
+        "second-person",
+        "third-person",
+      ]) ?? "",
+    ),
     mood: firstFeature(features, MOODS),
     tense: firstFeature(features, TENSES),
     verbForm: firstFeature(features, VERB_FORMS),
@@ -169,7 +185,9 @@ export interface WiktionaryLexiconLoadOptions {
   pos?: string | readonly string[];
 }
 
-function asPosFilter(pos: string | readonly string[] | undefined): Set<string> | null {
+function asPosFilter(
+  pos: string | readonly string[] | undefined,
+): Set<string> | null {
   if (pos === undefined) {
     return null;
   }

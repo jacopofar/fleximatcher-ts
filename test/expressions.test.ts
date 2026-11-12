@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   isRuleChunk,
-  parameter,
   PatternError,
+  parameter,
   ruleName,
   splitPattern,
   usedTags,

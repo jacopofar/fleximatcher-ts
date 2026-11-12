@@ -3,12 +3,12 @@
  */
 
 import {
+  type Annotation,
   AnnotationStore,
   Annotator,
+  buildDiagnostics,
   MatchFrame,
   MatchResult,
-  buildDiagnostics,
-  type Annotation,
 } from "./annotations.js";
 import { Budget, BudgetExceededError, type BudgetOptions } from "./budget.js";
 import {
@@ -31,14 +31,14 @@ import {
   PlainTextRule,
   RegexRuleFactory,
   RepeatRuleFactory,
+  type Rule,
+  type RuleFactory,
   SingleCharRuleFactory,
   WhitespaceRuleFactory,
   WordRuleFactory,
-  type Rule,
-  type RuleFactory,
 } from "./rules.js";
 import {
-  RuleDefinition,
+  type RuleDefinition,
   TagRuleFactory,
   type TagRuleOptions,
 } from "./tag.js";
@@ -359,7 +359,11 @@ export class FlexiMatcher {
     if (!ruleName) {
       throw new PatternError("A rule name cannot be empty");
     }
-    if (ruleName.includes("[") || ruleName.includes("]") || ruleName.includes(":")) {
+    if (
+      ruleName.includes("[") ||
+      ruleName.includes("]") ||
+      ruleName.includes(":")
+    ) {
       throw new PatternError(
         `Invalid rule name ${JSON.stringify(ruleName)}: names cannot contain brackets or ':'`,
       );
@@ -451,24 +455,33 @@ export class FlexiMatcher {
       return pattern;
     }
 
-    const expand = (text: string, depth: number, stack: readonly string[]): string => {
+    const expand = (
+      text: string,
+      depth: number,
+      stack: readonly string[],
+    ): string => {
       if (depth > 64) {
-        throw new PatternError("Pattern macro expansion exceeded its depth limit");
+        throw new PatternError(
+          "Pattern macro expansion exceeded its depth limit",
+        );
       }
-      return text.replace(/\{\{([A-Za-z0-9_.-]+)\}\}/g, (whole, name: string) => {
-        const macro = this.macros.get(name);
-        if (macro === undefined) {
-          throw new UnknownMacroError(
-            `The pattern macro ${JSON.stringify(name)} is not defined`,
-          );
-        }
-        if (stack.includes(name)) {
-          throw new PatternError(
-            `Cyclic pattern macro expansion: ${[...stack, name].join(" → ")}`,
-          );
-        }
-        return expand(macro, depth + 1, [...stack, name]);
-      });
+      return text.replace(
+        /\{\{([A-Za-z0-9_.-]+)\}\}/g,
+        (_whole, name: string) => {
+          const macro = this.macros.get(name);
+          if (macro === undefined) {
+            throw new UnknownMacroError(
+              `The pattern macro ${JSON.stringify(name)} is not defined`,
+            );
+          }
+          if (stack.includes(name)) {
+            throw new PatternError(
+              `Cyclic pattern macro expansion: ${[...stack, name].join(" → ")}`,
+            );
+          }
+          return expand(macro, depth + 1, [...stack, name]);
+        },
+      );
     };
 
     return expand(pattern, 0, []);
@@ -622,7 +635,9 @@ export class FlexiMatcher {
         warnings: [
           ...result.diagnostics.warnings,
           ...(options.strategy === "best"
-            ? ["Only the highest-scoring interpretations were kept (strategy: best)."]
+            ? [
+                "Only the highest-scoring interpretations were kept (strategy: best).",
+              ]
             : []),
         ],
       },
@@ -757,7 +772,11 @@ export class FlexiMatcher {
    *
    * @internal
    */
-  _match(text: string, pattern: string, options: InternalMatchOptions): MatchResult {
+  _match(
+    text: string,
+    pattern: string,
+    options: InternalMatchOptions,
+  ): MatchResult {
     const expanded = this._expandMacros(pattern);
     const chunks = splitPattern(expanded);
     const parts = this._resolveParts(expanded, chunks);

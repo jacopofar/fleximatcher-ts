@@ -808,18 +808,24 @@ The **Try tag grammar** button loads a small `determiner` / `nominal` /
 npm install
 npm test
 npm run typecheck
+npm run lint           # Biome: lint + format check (pre-commit hook runs this)
 npm run build
 npm run bench          # dependency-free benchmark smoke test
 ```
+
+`npm install` installs a pre-commit hook via
+[simple-git-hooks](https://github.com/toplenboren/simple-git-hooks) that runs
+`npm run lint`.  Apply fixes with `npm run lint:fix`; skip the hook for one
+commit with `SKIP_SIMPLE_GIT_HOOKS=1 git commit ...`.
 
 The test suite is a port of the original Java/Python tests plus coverage for
 modern templates, UTF-16 offsets, store validation, recursive grammars,
 seeded fuzz/property tests and diagnostics.  `npm test` includes
 `test/fuzz.test.ts`; run it alone with `npm run test:fuzz`.
 
-CI lives in `.github/workflows/ci.yml` and runs typecheck, tests, the build,
-the playground typecheck/build, the examples and a benchmark smoke test on
-Node 20.  `npm run ci` runs the same checks locally.
+CI lives in `.github/workflows/ci.yml` and runs lint, typecheck, tests, the
+build, the playground typecheck/build, the examples and a benchmark smoke test
+on Node 20.  `npm run ci` runs the same checks locally.
 
 The code is MIT-licensed; see [LICENSE](./LICENSE).  Generated Wiktionary
 lexicons are derived data and keep their own attribution; see

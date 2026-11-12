@@ -53,12 +53,31 @@ export interface LexiconEntry {
   declension?: string;
 }
 
-const GENDER_FEATURES = new Set(["masculine", "feminine", "by-personal-gender"]);
+const GENDER_FEATURES = new Set([
+  "masculine",
+  "feminine",
+  "by-personal-gender",
+]);
 const NUMBER_FEATURES = new Set(["singular", "plural"]);
-const PERSON_FEATURES = new Set(["first-person", "second-person", "third-person"]);
-const MOOD_FEATURES = new Set(["indicative", "subjunctive", "imperative", "conditional"]);
+const PERSON_FEATURES = new Set([
+  "first-person",
+  "second-person",
+  "third-person",
+]);
+const MOOD_FEATURES = new Set([
+  "indicative",
+  "subjunctive",
+  "imperative",
+  "conditional",
+]);
 const VERB_FORM_FEATURES = new Set(["infinitive", "gerund", "participle"]);
-const TENSE_FEATURES = new Set(["present", "imperfect", "future", "past", "historic"]);
+const TENSE_FEATURES = new Set([
+  "present",
+  "imperfect",
+  "future",
+  "past",
+  "historic",
+]);
 const CASE_FEATURES = new Set([
   "nominative",
   "genitive",
@@ -72,7 +91,10 @@ const CASE_FEATURES = new Set([
   "prepositional",
   "oblique",
 ]);
-const MOOD_OR_FORM_FEATURES = new Set([...MOOD_FEATURES, ...VERB_FORM_FEATURES]);
+const MOOD_OR_FORM_FEATURES = new Set([
+  ...MOOD_FEATURES,
+  ...VERB_FORM_FEATURES,
+]);
 
 const OVERRIDE_GROUPS = [
   GENDER_FEATURES,
@@ -113,7 +135,10 @@ function unique<T>(values: readonly T[]): T[] {
   return [...new Set(values)];
 }
 
-function stringArg(args: Record<string, unknown>, key: string): string | undefined {
+function stringArg(
+  args: Record<string, unknown>,
+  key: string,
+): string | undefined {
   const value = args[key];
   return value === undefined || value === null ? undefined : String(value);
 }
@@ -178,11 +203,14 @@ interface HeadInfo {
   declension?: string;
 }
 
-function headInfo(entry: WiktextractEntry, pos: string): HeadInfo {
+function headInfo(entry: WiktextractEntry): HeadInfo {
   const features = new Set<string>();
   const templates = entry.head_templates ?? [];
   const find = (...names: string[]): WiktextractTemplate | undefined =>
-    templates.find((template) => template.name !== undefined && names.includes(template.name));
+    templates.find(
+      (template) =>
+        template.name !== undefined && names.includes(template.name),
+    );
 
   const noun = find("it-noun");
   if (noun !== undefined) {
@@ -319,9 +347,7 @@ function mergeFormFeatures(
   // A finite form (person or tense) is not the infinitive/gerund/participle
   // even when the source data omitted an explicit mood tag.
   if (
-    [...tags].some(
-      (tag) => PERSON_FEATURES.has(tag) || TENSE_FEATURES.has(tag),
-    )
+    [...tags].some((tag) => PERSON_FEATURES.has(tag) || TENSE_FEATURES.has(tag))
   ) {
     for (const feature of VERB_FORM_FEATURES) {
       merged.delete(feature);
@@ -377,21 +403,30 @@ function deriveBaseFeatures(
     if (numberFromFeatures(features) === undefined) {
       features.add("singular");
     }
-    if (genderFromFeatures(features) === undefined && formTags.has("feminine")) {
+    if (
+      genderFromFeatures(features) === undefined &&
+      formTags.has("feminine")
+    ) {
       features.add("masculine");
     }
   } else if (pos === "det") {
     if (numberFromFeatures(features) === undefined) {
       features.add("singular");
     }
-    if (genderFromFeatures(features) === undefined && formTags.has("feminine")) {
+    if (
+      genderFromFeatures(features) === undefined &&
+      formTags.has("feminine")
+    ) {
       features.add("masculine");
     }
   } else if (pos === "article") {
     if (numberFromFeatures(features) === undefined) {
       features.add("singular");
     }
-    if (genderFromFeatures(features) === undefined && formTags.has("feminine")) {
+    if (
+      genderFromFeatures(features) === undefined &&
+      formTags.has("feminine")
+    ) {
       features.add("masculine");
     }
   } else if (pos === "verb") {
@@ -448,7 +483,7 @@ export function transformEntry(entry: WiktextractEntry): LexiconEntry[] {
   const senseTags = new Set(
     senses.flatMap((sense) => (sense.tags ?? []).map(normalizeFeature)),
   );
-  const head = headInfo(entry, pos);
+  const head = headInfo(entry);
   const baseFeatures = deriveBaseFeatures(
     pos,
     isForm,
@@ -465,7 +500,10 @@ export function transformEntry(entry: WiktextractEntry): LexiconEntry[] {
     const existing = entries.get(key);
     if (existing === undefined) {
       entries.set(key, candidate);
-    } else if (existing.declension === undefined && candidate.declension !== undefined) {
+    } else if (
+      existing.declension === undefined &&
+      candidate.declension !== undefined
+    ) {
       existing.declension = candidate.declension;
     }
   };

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * Build a compact Wiktionary lexicon from a raw wiktextract JSONL dump.
  *
@@ -13,15 +14,19 @@
  * ```
  */
 
-import { createReadStream, createWriteStream, mkdirSync } from "node:fs";
 import { once } from "node:events";
+import { createReadStream, createWriteStream, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { createInterface } from "node:readline";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { createGunzip, createGzip } from "node:zlib";
 
-import { transformEntry, type LexiconEntry, type WiktextractEntry } from "./transform.js";
+import {
+  type LexiconEntry,
+  transformEntry,
+  type WiktextractEntry,
+} from "./transform.js";
 
 export interface BuildLexiconOptions {
   input: string;
@@ -60,7 +65,9 @@ function compact(entry: LexiconEntry): Record<string, unknown> {
 }
 
 /** Stream `input` and write the compact lexicon to `output`. */
-export async function buildLexicon(options: BuildLexiconOptions): Promise<BuildLexiconStats> {
+export async function buildLexicon(
+  options: BuildLexiconOptions,
+): Promise<BuildLexiconStats> {
   const {
     input,
     output,
@@ -170,23 +177,29 @@ export async function buildLexicon(options: BuildLexiconOptions): Promise<BuildL
 }
 
 /** CLI entry point. */
-export async function main(argv: string[] = process.argv.slice(2)): Promise<number> {
-  let parsed;
+function parseCliArgs(argv: string[]) {
+  return parseArgs({
+    args: argv,
+    allowPositionals: false,
+    options: {
+      input: { type: "string" },
+      output: { type: "string" },
+      language: { type: "string", default: "it" },
+      "language-name": { type: "string" },
+      limit: { type: "string", default: "0" },
+      "no-derived": { type: "boolean", default: false },
+      progress: { type: "string", default: "100000" },
+      help: { type: "boolean", default: false },
+    },
+  });
+}
+
+export async function main(
+  argv: string[] = process.argv.slice(2),
+): Promise<number> {
+  let parsed: ReturnType<typeof parseCliArgs>;
   try {
-    parsed = parseArgs({
-      args: argv,
-      allowPositionals: false,
-      options: {
-        input: { type: "string" },
-        output: { type: "string" },
-        language: { type: "string", default: "it" },
-        "language-name": { type: "string" },
-        limit: { type: "string", default: "0" },
-        "no-derived": { type: "boolean", default: false },
-        progress: { type: "string", default: "100000" },
-        help: { type: "boolean", default: false },
-      },
-    });
+    parsed = parseCliArgs(argv);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     return 2;
@@ -211,7 +224,12 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
 
   const limit = Number.parseInt(values.limit, 10);
   const progressEvery = Number.parseInt(values.progress, 10);
-  if (!Number.isFinite(limit) || limit < 0 || !Number.isFinite(progressEvery) || progressEvery < 0) {
+  if (
+    !Number.isFinite(limit) ||
+    limit < 0 ||
+    !Number.isFinite(progressEvery) ||
+    progressEvery < 0
+  ) {
     console.error("--limit and --progress must be non-negative integers");
     return 2;
   }
@@ -231,12 +249,17 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     );
     return 0;
   } catch (error) {
-    console.error(error instanceof Error ? error.stack ?? error.message : String(error));
+    console.error(
+      error instanceof Error ? (error.stack ?? error.message) : String(error),
+    );
     return 1;
   }
 }
 
 const invokedPath = process.argv[1];
-if (invokedPath !== undefined && import.meta.url === pathToFileURL(invokedPath).href) {
+if (
+  invokedPath !== undefined &&
+  import.meta.url === pathToFileURL(invokedPath).href
+) {
   void main().then((code) => process.exit(code));
 }

@@ -56,16 +56,15 @@ function agrees(text) {
       compatible(article.data ?? {}, noun.data ?? {})
     );
   });
-  return { text, matches: result.matching, readings: readings.length, agrees: accepted };
+  return {
+    text,
+    matches: result.matching,
+    readings: readings.length,
+    agrees: accepted,
+  };
 }
 
-const sentences = [
-  "La casa",
-  "Le case",
-  "Il case",
-  "La case",
-  "Una mela",
-];
+const sentences = ["La casa", "Le case", "Il case", "La case", "Una mela"];
 
 console.log(`lexicon: ${lexicon}`);
 console.table(sentences.map(agrees));

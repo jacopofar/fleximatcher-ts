@@ -20,8 +20,7 @@ const defaultLexicon = fileURLToPath(
 );
 const lexiconPath = process.argv[2] ?? defaultLexicon;
 const text =
-  process.argv[3] ??
-  "Le case sono belle, ma l'uomo dell'acqua non lo sa.";
+  process.argv[3] ?? "Le case sono belle, ma l'uomo dell'acqua non lo sa.";
 
 const lexicon = await loadWiktionaryLexicon(lexiconPath);
 const matcher = new FlexiMatcher({ explain: true });

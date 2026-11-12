@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   AnnotationStore,
-  Annotator,
+  type Annotator,
   BudgetExceededError,
   CompiledPattern,
   FlexiMatcher,
@@ -35,7 +35,8 @@ describe("built-in rules", () => {
       matcher.matches("AbC", "A[i:b][r:k]", { populateResult: true }).matching,
     ).toBe(false);
     expect(
-      matcher.matches("AbC", "A[i:b][r:[cC]]", { populateResult: true }).matching,
+      matcher.matches("AbC", "A[i:b][r:[cC]]", { populateResult: true })
+        .matching,
     ).toBe(true);
     expect(
       matcher.matches("eeAbC", "A[i:b][r:[cC]]", {
@@ -52,7 +53,9 @@ describe("built-in rules", () => {
       /Cannot create a regex annotator/,
     );
     expect(() => matcher.matches("x", "[r:(]")).toThrow(RuleError);
-    expect(() => matcher.matches("x", "[r:(]")).toThrow(/Invalid regular expression/);
+    expect(() => matcher.matches("x", "[r:(]")).toThrow(
+      /Invalid regular expression/,
+    );
   });
 
   it("does not explode on regexes that match the empty string", () => {
@@ -79,7 +82,9 @@ describe("built-in rules", () => {
   it("matches multi as an intersection of sub-patterns", () => {
     const matcher = new FlexiMatcher();
     expect(matcher.matches("AbC", "A[r:[bD]+]C").matching).toBe(true);
-    expect(matcher.matches("AbC", "A[multi:[r:[bD]+][i:B]]C").matching).toBe(true);
+    expect(matcher.matches("AbC", "A[multi:[r:[bD]+][i:B]]C").matching).toBe(
+      true,
+    );
     expect(matcher.matches("AbC", "A[r:[BD]+]C").matching).toBe(false);
     expect(matcher.matches("AbC", "ABC").matching).toBe(false);
 
@@ -101,7 +106,9 @@ describe("built-in rules", () => {
 
   it("accepts the extra brackets of the original multi syntax", () => {
     const matcher = new FlexiMatcher();
-    expect(matcher.matches("AbC", "A[multi:[[r:[bD]+][i:B]]]C").matching).toBe(true);
+    expect(matcher.matches("AbC", "A[multi:[[r:[bD]+][i:B]]]C").matching).toBe(
+      true,
+    );
   });
 
   it("matches single Unicode code points with char", () => {
@@ -136,7 +143,11 @@ describe("built-in rules", () => {
       fullyAnnotate: true,
     });
     expect(
-      new Set(store.ofType("aa").map((annotation) => `${annotation.start}:${annotation.end}`)),
+      new Set(
+        store
+          .ofType("aa")
+          .map((annotation) => `${annotation.start}:${annotation.end}`),
+      ),
     ).toEqual(new Set(["0:2", "1:3", "2:4"]));
   });
 
@@ -160,7 +171,9 @@ describe("built-in rules", () => {
     expect(() => matcher.matches("x", "[definitely-not-bound]")).toThrow(
       UnknownRuleError,
     );
-    expect(() => matcher.matches("x", "[definitely-not-bound]")).toThrow(/unknown/);
+    expect(() => matcher.matches("x", "[definitely-not-bound]")).toThrow(
+      /unknown/,
+    );
   });
 
   it("exposes match result helpers", () => {
@@ -207,8 +220,13 @@ describe("built-in rules", () => {
       identifier: "id_pear",
       template: { name: "pear" },
     });
-    const result = matcher.matches("pear", "[tag:fruit]", { populateResult: true });
-    const data = result.interpretations?.[0]?.[0]?.data as Record<string, unknown>;
+    const result = matcher.matches("pear", "[tag:fruit]", {
+      populateResult: true,
+    });
+    const data = result.interpretations?.[0]?.[0]?.data as Record<
+      string,
+      unknown
+    >;
     expect(data.__explain).toMatchObject({ id: "id_pear" });
   });
 
@@ -225,7 +243,10 @@ describe("built-in rules", () => {
     const factory = {
       getRule() {
         return {
-          annotate(text: string, annotator: { add: (start: number, end: number) => void }) {
+          annotate(
+            text: string,
+            annotator: { add: (start: number, end: number) => void },
+          ) {
             annotator.add(0, text.length);
             return true;
           },
@@ -259,7 +280,10 @@ describe("built-in rules", () => {
     const always = {
       getRule() {
         return {
-          annotate(text: string, annotator: { add: (start: number, end: number) => void }) {
+          annotate(
+            text: string,
+            annotator: { add: (start: number, end: number) => void },
+          ) {
             annotator.add(0, text.length);
             return true;
           },
@@ -306,7 +330,9 @@ describe("built-in rules", () => {
         return {
           annotate(text: string, annotator: Annotator) {
             const compiled = annotator.matcher.compile("[i:b]");
-            const result = annotator.match(text, compiled, { matchWhole: false });
+            const result = annotator.match(text, compiled, {
+              matchWhole: false,
+            });
             if (result.matching) {
               annotator.add(0, text.length);
             }
@@ -352,9 +378,9 @@ describe("built-in rules", () => {
     expect(matcher.matches("ha", "[repeat:[i:ha]]").matching).toBe(true);
     expect(matcher.matches("hahaha", "[repeat:[i:ha]]").matching).toBe(true);
     expect(matcher.matches("xx", "[repeat:[i:ha]]").matching).toBe(false);
-    expect(
-      matcher.matches("hahaha!", "[repeat:[i:ha]][i:!]").matching,
-    ).toBe(true);
+    expect(matcher.matches("hahaha!", "[repeat:[i:ha]][i:!]").matching).toBe(
+      true,
+    );
 
     const result = matcher.matches("hahaha", "[repeat:[i:ha]]", {
       fullyAnnotate: true,
@@ -373,9 +399,9 @@ describe("built-in rules", () => {
 
   it("matches repeated multi-chunk patterns", () => {
     const matcher = new FlexiMatcher();
-    expect(
-      matcher.matches("ha!ha!", "[repeat:[i:ha][i:!]]").matching,
-    ).toBe(true);
+    expect(matcher.matches("ha!ha!", "[repeat:[i:ha][i:!]]").matching).toBe(
+      true,
+    );
     const result = matcher.matches("ha!ha!", "[repeat:[i:ha][i:!]]", {
       fullyAnnotate: true,
       populateResult: true,
@@ -498,9 +524,9 @@ describe("built-in rules", () => {
       },
       generateSample: () => null,
     });
-    expect(() =>
-      matcher.matches("x", "[slow]", { timeoutMs: 1 }),
-    ).toThrow(BudgetExceededError);
+    expect(() => matcher.matches("x", "[slow]", { timeoutMs: 1 })).toThrow(
+      BudgetExceededError,
+    );
   });
 
   it("ranks interpretations and can keep the best", () => {
@@ -508,8 +534,7 @@ describe("built-in rules", () => {
     const ranked = matcher.matches("ab", "[r:a|ab]", {
       matchWhole: false,
       populateResult: true,
-      rankInterpretation: (sequence) =>
-        sequence[0].end - sequence[0].start,
+      rankInterpretation: (sequence) => sequence[0].end - sequence[0].start,
       strategy: "best",
     });
     expect(ranked.interpretations).toHaveLength(1);
@@ -519,8 +544,7 @@ describe("built-in rules", () => {
     const all = matcher.matches("ab", "[r:a|ab]", {
       matchWhole: false,
       populateResult: true,
-      rankInterpretation: (sequence) =>
-        sequence[0].end - sequence[0].start,
+      rankInterpretation: (sequence) => sequence[0].end - sequence[0].start,
     });
     expect(all.interpretations).toHaveLength(2);
     expect(all.scores).toEqual([2, 1]);
@@ -578,7 +602,9 @@ describe("built-in rules", () => {
     const store = new AnnotationStore();
     matcher.matches("x", "x", { store });
     expect(() => matcher.matches("y", "y", { store })).toThrow(RuleError);
-    expect(() => matcher.matches("y", "y", { store })).toThrow(/different text/);
+    expect(() => matcher.matches("y", "y", { store })).toThrow(
+      /different text/,
+    );
   });
 
   it("rejects annotations outside the text", () => {
@@ -586,7 +612,10 @@ describe("built-in rules", () => {
     matcher.bind("bad", {
       getRule() {
         return {
-          annotate(_text: string, annotator: { add: (start: number, end: number) => void }) {
+          annotate(
+            _text: string,
+            annotator: { add: (start: number, end: number) => void },
+          ) {
             annotator.add(0, 99);
             return true;
           },

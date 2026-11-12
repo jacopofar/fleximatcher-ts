@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>fleximatcher</title>
   <rect width="64" height="64" rx="16" fill="#c94f37"/>
   <path d="M22 18h22v7H30v7h12v7H30v13h-8z" fill="#fff8ee"/>
 </svg>

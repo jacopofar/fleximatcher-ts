@@ -9,7 +9,7 @@
 
 import type { Annotator } from "./annotations.js";
 import { PatternError, RuleError } from "./errors.js";
-import { isRuleChunk, parameter, ruleName, splitPattern } from "./expressions.js";
+import { isRuleChunk, ruleName, splitPattern } from "./expressions.js";
 import type { CompiledPattern, FlexiMatcher } from "./matcher.js";
 
 /** A rule annotates a text and reports whether it matched it entirely. */
@@ -48,15 +48,20 @@ export interface RuleFactory {
 }
 
 function sanitizeRegexFlags(flags: string): string {
-  const unique = Array.from(new Set(flags.replace(/[gy]/g, "").split(""))).join("");
+  const unique = Array.from(new Set(flags.replace(/[gy]/g, "").split(""))).join(
+    "",
+  );
   return unique;
 }
 
 function regexError(source: string, error: unknown): RuleError {
   const reason = error instanceof Error ? error.message : String(error);
-  return new RuleError(`Invalid regular expression ${JSON.stringify(source)}: ${reason}`, {
-    cause: error,
-  });
+  return new RuleError(
+    `Invalid regular expression ${JSON.stringify(source)}: ${reason}`,
+    {
+      cause: error,
+    },
+  );
 }
 
 /**
@@ -116,7 +121,9 @@ export class RegexRule implements Rule {
 
   constructor(pattern: string, flags = "u", maxSpan = 0) {
     if (!pattern) {
-      throw new RuleError("Cannot create a regex annotator with an empty pattern");
+      throw new RuleError(
+        "Cannot create a regex annotator with an empty pattern",
+      );
     }
     const cleanFlags = sanitizeRegexFlags(flags);
     try {
@@ -176,7 +183,9 @@ export class RegexRule implements Rule {
 export class InsensitiveCaseRule extends RegexRule {
   constructor(text: string, flags = "u", maxSpan = 0) {
     if (!text) {
-      throw new RuleError("Cannot create a case-insensitive annotator with an empty pattern");
+      throw new RuleError(
+        "Cannot create a case-insensitive annotator with an empty pattern",
+      );
     }
     super(escapeRegExp(text), `${flags}i`, maxSpan);
   }
@@ -200,12 +209,10 @@ function escapeRegExp(text: string): string {
  */
 export class MultiRule implements Rule {
   readonly conditions: readonly string[];
-  private readonly matcher: FlexiMatcher;
   private readonly compiledConditions: readonly CompiledPattern[];
 
   constructor(conditions: string, matcher: FlexiMatcher) {
     this.conditions = multiConditions(conditions);
-    this.matcher = matcher;
     this.compiledConditions = this.conditions.map((condition) =>
       matcher.compile(condition),
     );
@@ -631,7 +638,10 @@ export class WordRule implements Rule {
           continue;
         }
         seen.add(key);
-        if (normalizeWord(text.slice(candidateStart, candidateEnd)) !== this.target) {
+        if (
+          normalizeWord(text.slice(candidateStart, candidateEnd)) !==
+          this.target
+        ) {
           continue;
         }
         annotator.add(candidateStart, candidateEnd);
@@ -668,7 +678,9 @@ export class RegexRuleFactory implements RuleFactory {
 
   getRule(parameter: string): RegexRule {
     if (!parameter) {
-      throw new RuleError("Cannot create a regex annotator with an empty pattern");
+      throw new RuleError(
+        "Cannot create a regex annotator with an empty pattern",
+      );
     }
     let rule = this.cache.get(parameter);
     if (rule === undefined) {
@@ -703,7 +715,9 @@ export class InsensitiveCaseRuleFactory implements RuleFactory {
 
   getRule(parameter: string): InsensitiveCaseRule {
     if (!parameter) {
-      throw new RuleError("Cannot create a case-insensitive annotator with an empty pattern");
+      throw new RuleError(
+        "Cannot create a case-insensitive annotator with an empty pattern",
+      );
     }
     let rule = this.cache.get(parameter);
     if (rule === undefined) {
@@ -856,7 +870,9 @@ export class SingleCharRuleFactory implements RuleFactory {
 function parseCodePoint(parameter: string): string {
   const trimmed = parameter.trim();
   if (!trimmed) {
-    throw new RuleError("Cannot create a character annotator with an empty pattern");
+    throw new RuleError(
+      "Cannot create a character annotator with an empty pattern",
+    );
   }
 
   let codePoint: number;

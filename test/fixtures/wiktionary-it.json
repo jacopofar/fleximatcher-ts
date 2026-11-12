@@ -5,69 +5,279 @@
   "languageName": "Italian",
   "words": {
     "casa": [
-      { "word": "casa", "lemma": "casa", "pos": "noun", "features": ["lemma", "feminine", "singular"], "declension": "it-noun:f" },
-      { "word": "case", "lemma": "casa", "pos": "noun", "features": ["inflected", "feminine", "plural"], "declension": "it-noun:f" },
-      { "word": "casina", "lemma": "casa", "pos": "noun", "features": ["inflected", "derived", "diminutive", "feminine", "singular"], "declension": "it-noun:f" }
+      {
+        "word": "casa",
+        "lemma": "casa",
+        "pos": "noun",
+        "features": ["lemma", "feminine", "singular"],
+        "declension": "it-noun:f"
+      },
+      {
+        "word": "case",
+        "lemma": "casa",
+        "pos": "noun",
+        "features": ["inflected", "feminine", "plural"],
+        "declension": "it-noun:f"
+      },
+      {
+        "word": "casina",
+        "lemma": "casa",
+        "pos": "noun",
+        "features": [
+          "inflected",
+          "derived",
+          "diminutive",
+          "feminine",
+          "singular"
+        ],
+        "declension": "it-noun:f"
+      }
     ],
     "uomo": [
-      { "word": "uomo", "lemma": "uomo", "pos": "noun", "features": ["lemma", "masculine", "singular"], "declension": "it-noun:m" },
-      { "word": "uomini", "lemma": "uomo", "pos": "noun", "features": ["inflected", "masculine", "plural"], "declension": "it-noun:m" }
+      {
+        "word": "uomo",
+        "lemma": "uomo",
+        "pos": "noun",
+        "features": ["lemma", "masculine", "singular"],
+        "declension": "it-noun:m"
+      },
+      {
+        "word": "uomini",
+        "lemma": "uomo",
+        "pos": "noun",
+        "features": ["inflected", "masculine", "plural"],
+        "declension": "it-noun:m"
+      }
     ],
     "libero": [
-      { "word": "libero", "lemma": "libero", "pos": "adj", "features": ["lemma", "masculine", "singular"], "declension": "it-adj" },
-      { "word": "libera", "lemma": "libero", "pos": "adj", "features": ["inflected", "feminine", "singular"], "declension": "it-adj" },
-      { "word": "liberi", "lemma": "libero", "pos": "adj", "features": ["inflected", "masculine", "plural"], "declension": "it-adj" },
-      { "word": "libere", "lemma": "libero", "pos": "adj", "features": ["inflected", "feminine", "plural"], "declension": "it-adj" },
-      { "word": "liberissimo", "lemma": "libero", "pos": "adj", "features": ["inflected", "derived", "superlative", "masculine", "singular"], "declension": "it-adj" }
+      {
+        "word": "libero",
+        "lemma": "libero",
+        "pos": "adj",
+        "features": ["lemma", "masculine", "singular"],
+        "declension": "it-adj"
+      },
+      {
+        "word": "libera",
+        "lemma": "libero",
+        "pos": "adj",
+        "features": ["inflected", "feminine", "singular"],
+        "declension": "it-adj"
+      },
+      {
+        "word": "liberi",
+        "lemma": "libero",
+        "pos": "adj",
+        "features": ["inflected", "masculine", "plural"],
+        "declension": "it-adj"
+      },
+      {
+        "word": "libere",
+        "lemma": "libero",
+        "pos": "adj",
+        "features": ["inflected", "feminine", "plural"],
+        "declension": "it-adj"
+      },
+      {
+        "word": "liberissimo",
+        "lemma": "libero",
+        "pos": "adj",
+        "features": [
+          "inflected",
+          "derived",
+          "superlative",
+          "masculine",
+          "singular"
+        ],
+        "declension": "it-adj"
+      }
     ],
     "dare": [
-      { "word": "dare", "lemma": "dare", "pos": "verb", "features": ["lemma", "infinitive"], "declension": "it-verb:a/@" },
-      { "word": "dò", "lemma": "dare", "pos": "verb", "features": ["inflected", "first-person", "indicative", "present", "singular"], "declension": "it-verb:a/@" },
-      { "word": "dà", "lemma": "dare", "pos": "verb", "features": ["inflected", "indicative", "present", "singular", "third-person"], "declension": "it-verb:a/@" },
-      { "word": "dato", "lemma": "dare", "pos": "verb", "features": ["inflected", "participle", "past", "masculine", "singular"], "declension": "it-verb:a/@" }
+      {
+        "word": "dare",
+        "lemma": "dare",
+        "pos": "verb",
+        "features": ["lemma", "infinitive"],
+        "declension": "it-verb:a/@"
+      },
+      {
+        "word": "dò",
+        "lemma": "dare",
+        "pos": "verb",
+        "features": [
+          "inflected",
+          "first-person",
+          "indicative",
+          "present",
+          "singular"
+        ],
+        "declension": "it-verb:a/@"
+      },
+      {
+        "word": "dà",
+        "lemma": "dare",
+        "pos": "verb",
+        "features": [
+          "inflected",
+          "indicative",
+          "present",
+          "singular",
+          "third-person"
+        ],
+        "declension": "it-verb:a/@"
+      },
+      {
+        "word": "dato",
+        "lemma": "dare",
+        "pos": "verb",
+        "features": [
+          "inflected",
+          "participle",
+          "past",
+          "masculine",
+          "singular"
+        ],
+        "declension": "it-verb:a/@"
+      }
     ],
     "porta": [
-      { "word": "porta", "lemma": "porta", "pos": "noun", "features": ["lemma", "feminine", "singular"], "declension": "it-noun:f" },
-      { "word": "porta", "lemma": "portare", "pos": "verb", "features": ["inflected", "indicative", "present", "singular", "third-person"], "declension": "it-verb:a" }
+      {
+        "word": "porta",
+        "lemma": "porta",
+        "pos": "noun",
+        "features": ["lemma", "feminine", "singular"],
+        "declension": "it-noun:f"
+      },
+      {
+        "word": "porta",
+        "lemma": "portare",
+        "pos": "verb",
+        "features": [
+          "inflected",
+          "indicative",
+          "present",
+          "singular",
+          "third-person"
+        ],
+        "declension": "it-verb:a"
+      }
     ],
     "acqua": [
-      { "word": "acqua", "lemma": "acqua", "pos": "noun", "features": ["lemma", "feminine", "singular"], "declension": "it-noun:f" }
+      {
+        "word": "acqua",
+        "lemma": "acqua",
+        "pos": "noun",
+        "features": ["lemma", "feminine", "singular"],
+        "declension": "it-noun:f"
+      }
     ],
     "dell'": [
-      { "word": "dell'", "lemma": "dell'", "pos": "contraction", "features": ["lemma", "abbreviation", "alt-of", "contraction"], "declension": "it-pos:contraction" }
+      {
+        "word": "dell'",
+        "lemma": "dell'",
+        "pos": "contraction",
+        "features": ["lemma", "abbreviation", "alt-of", "contraction"],
+        "declension": "it-pos:contraction"
+      }
     ],
     "l'": [
-      { "word": "l'", "lemma": "il", "pos": "article", "features": ["inflected", "masculine", "singular"], "declension": "it-article" }
+      {
+        "word": "l'",
+        "lemma": "il",
+        "pos": "article",
+        "features": ["inflected", "masculine", "singular"],
+        "declension": "it-article"
+      }
     ],
     "le": [
-      { "word": "le", "lemma": "il", "pos": "article", "features": ["inflected", "feminine", "plural"], "declension": "it-article" }
+      {
+        "word": "le",
+        "lemma": "il",
+        "pos": "article",
+        "features": ["inflected", "feminine", "plural"],
+        "declension": "it-article"
+      }
     ],
     "di": [
-      { "word": "di", "lemma": "di", "pos": "prep", "features": ["lemma"], "declension": "it-pos:preposition" }
+      {
+        "word": "di",
+        "lemma": "di",
+        "pos": "prep",
+        "features": ["lemma"],
+        "declension": "it-pos:preposition"
+      }
     ],
     "e": [
-      { "word": "e", "lemma": "e", "pos": "conj", "features": ["lemma"], "declension": "it-pos:conjunctions" }
+      {
+        "word": "e",
+        "lemma": "e",
+        "pos": "conj",
+        "features": ["lemma"],
+        "declension": "it-pos:conjunctions"
+      }
     ],
     "sempre": [
-      { "word": "sempre", "lemma": "sempre", "pos": "adv", "features": ["lemma"], "declension": "it-adv" }
+      {
+        "word": "sempre",
+        "lemma": "sempre",
+        "pos": "adv",
+        "features": ["lemma"],
+        "declension": "it-adv"
+      }
     ],
     "questo": [
-      { "word": "questo", "lemma": "questo", "pos": "det", "features": ["lemma", "masculine", "singular"], "declension": "it-det" }
+      {
+        "word": "questo",
+        "lemma": "questo",
+        "pos": "det",
+        "features": ["lemma", "masculine", "singular"],
+        "declension": "it-det"
+      }
     ],
     "egli": [
-      { "word": "egli", "lemma": "egli", "pos": "pron", "features": ["lemma", "masculine", "singular"], "declension": "it-pron" }
+      {
+        "word": "egli",
+        "lemma": "egli",
+        "pos": "pron",
+        "features": ["lemma", "masculine", "singular"],
+        "declension": "it-pron"
+      }
     ],
     "lo": [
-      { "word": "lo", "lemma": "lo", "pos": "pron", "features": ["lemma", "accusative", "masculine", "singular"], "declension": "it-pron" }
+      {
+        "word": "lo",
+        "lemma": "lo",
+        "pos": "pron",
+        "features": ["lemma", "accusative", "masculine", "singular"],
+        "declension": "it-pron"
+      }
     ],
     "gli": [
-      { "word": "gli", "lemma": "gli", "pos": "pron", "features": ["lemma", "dative", "masculine", "plural"], "declension": "it-pron" }
+      {
+        "word": "gli",
+        "lemma": "gli",
+        "pos": "pron",
+        "features": ["lemma", "dative", "masculine", "plural"],
+        "declension": "it-pron"
+      }
     ],
     "uno": [
-      { "word": "uno", "lemma": "uno", "pos": "num", "features": ["lemma", "masculine", "singular"], "declension": "it-num" }
+      {
+        "word": "uno",
+        "lemma": "uno",
+        "pos": "num",
+        "features": ["lemma", "masculine", "singular"],
+        "declension": "it-num"
+      }
     ],
     "Dio": [
-      { "word": "Dio", "lemma": "Dio", "pos": "name", "features": ["lemma", "masculine", "singular"], "declension": "it-name:m" }
+      {
+        "word": "Dio",
+        "lemma": "Dio",
+        "pos": "name",
+        "features": ["lemma", "masculine", "singular"],
+        "declension": "it-name:m"
+      }
     ]
   }
 }

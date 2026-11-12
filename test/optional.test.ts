@@ -18,11 +18,10 @@ describe("optional combinator", () => {
 
   it("keeps both interpretations when the optional part is present", () => {
     const matcher = new FlexiMatcher();
-    const result = matcher.matches(
-      "a b",
-      "[i:a][optional:[ws][i:b]]",
-      { matchWhole: false, populateResult: true },
-    );
+    const result = matcher.matches("a b", "[i:a][optional:[ws][i:b]]", {
+      matchWhole: false,
+      populateResult: true,
+    });
     expect(result.matching).toBe(true);
     const lengths = new Set(
       (result.interpretations ?? []).map((sequence) => sequence.length),
@@ -33,18 +32,18 @@ describe("optional combinator", () => {
 
   it("works at the start and at the end of a pattern", () => {
     const matcher = new FlexiMatcher();
-    expect(
-      matcher.matches("b", "[optional:[i:a][ws]][i:b]").matching,
-    ).toBe(true);
-    expect(
-      matcher.matches("a b", "[optional:[i:a][ws]][i:b]").matching,
-    ).toBe(true);
-    expect(
-      matcher.matches("a", "[i:a][optional:[ws][i:b]]").matching,
-    ).toBe(true);
-    expect(
-      matcher.matches("a b", "[i:a][optional:[ws][i:b]]").matching,
-    ).toBe(true);
+    expect(matcher.matches("b", "[optional:[i:a][ws]][i:b]").matching).toBe(
+      true,
+    );
+    expect(matcher.matches("a b", "[optional:[i:a][ws]][i:b]").matching).toBe(
+      true,
+    );
+    expect(matcher.matches("a", "[i:a][optional:[ws][i:b]]").matching).toBe(
+      true,
+    );
+    expect(matcher.matches("a b", "[i:a][optional:[ws][i:b]]").matching).toBe(
+      true,
+    );
   });
 
   it("matches an empty text when the whole pattern is optional", () => {
@@ -69,12 +68,16 @@ describe("optional combinator", () => {
     const matcher = new FlexiMatcher();
     matcher.addTagRule("letter", "[i:x]", { identifier: "id_x" });
     expect(
-      matcher.matches("a x x b", "[i:a][ws][optional:[repeat:[tag:letter][ws]]][i:b]")
-        .matching,
+      matcher.matches(
+        "a x x b",
+        "[i:a][ws][optional:[repeat:[tag:letter][ws]]][i:b]",
+      ).matching,
     ).toBe(true);
     expect(
-      matcher.matches("a x y b", "[i:a][ws][optional:[repeat:[tag:letter][ws]]][i:b]")
-        .matching,
+      matcher.matches(
+        "a x y b",
+        "[i:a][ws][optional:[repeat:[tag:letter][ws]]][i:b]",
+      ).matching,
     ).toBe(false);
     expect(
       matcher.matches("a b", "[i:a][ws][optional:[optional:[i:x][ws]]][i:b]")
@@ -96,7 +99,9 @@ describe("optional combinator", () => {
 
   it("generates a sample from the inner pattern", () => {
     const matcher = new FlexiMatcher();
-    expect(matcher.generateSample("[optional:[i:ha]]").toLowerCase()).toBe("ha");
+    expect(matcher.generateSample("[optional:[i:ha]]").toLowerCase()).toBe(
+      "ha",
+    );
   });
 
   it("recurses into usedTags", () => {

@@ -33,7 +33,10 @@ function buildGraph(): {
     explain: true,
     populateResult: true,
   });
-  const graph = ProvenanceGraph.fromAnnotations(result.store.annotations, "pear");
+  const graph = ProvenanceGraph.fromAnnotations(
+    result.store.annotations,
+    "pear",
+  );
   const fruit = result.store.annotations.find(
     (annotation) => annotation.type === "[tag:fruit]",
   );
@@ -79,7 +82,10 @@ describe("provenance graph", () => {
   it("returns an empty graph when there are no explanations", () => {
     const matcher = new FlexiMatcher();
     const result = matcher.matches("pear", "[i:pear]");
-    const graph = ProvenanceGraph.fromAnnotations(result.store.annotations, "pear");
+    const graph = ProvenanceGraph.fromAnnotations(
+      result.store.annotations,
+      "pear",
+    );
     expect(graph.nodes.size).toBe(0);
     expect(graph.roots).toEqual([]);
     expect(graph.toJSON().nodes).toEqual([]);

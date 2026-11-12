@@ -12,8 +12,8 @@ import { createGunzip, gunzipSync } from "node:zlib";
 
 import {
   createWiktionaryEntry,
-  WiktionaryLexicon,
   type WiktionaryEntryInput,
+  WiktionaryLexicon,
   type WiktionaryLexiconData,
   type WiktionaryLexiconLoadOptions,
 } from "./lexicon.js";
@@ -89,9 +89,7 @@ async function loadJsonl(
       }
       continue;
     }
-    lexicon.add(
-      createWiktionaryEntry(raw as unknown as WiktionaryEntryInput),
-    );
+    lexicon.add(createWiktionaryEntry(raw as unknown as WiktionaryEntryInput));
   }
 
   lexicon.seal();

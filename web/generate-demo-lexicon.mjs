@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * Extract a small, curated Italian lexicon for the browser demo.
  *
@@ -8,15 +9,19 @@
  *     web/frontend/src/demo-lexicon.json
  */
 
-import { createReadStream, createWriteStream } from "node:fs";
 import { once } from "node:events";
+import { createReadStream, createWriteStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { createGunzip } from "node:zlib";
 
 import { normalizeWordKey } from "../dist/wiktionary/index.js";
 
-const [, , input = "data/wiktionary-it.jsonl.gz", output = "web/frontend/src/demo-lexicon.json"] =
-  process.argv;
+const [
+  ,
+  ,
+  input = "data/wiktionary-it.jsonl.gz",
+  output = "web/frontend/src/demo-lexicon.json",
+] = process.argv;
 
 const LEMMAS = `
 casa uomo donna mela acqua cane gatto libro città amico amica padre madre
@@ -41,7 +46,9 @@ ieri io tu lui lei noi voi loro mi ti ci vi ne questo questa questi queste
 quello quella quelli quelle
 `;
 
-const words = new Set(LEMMAS.trim().split(/\s+/).filter(Boolean).map(normalizeWordKey));
+const words = new Set(
+  LEMMAS.trim().split(/\s+/).filter(Boolean).map(normalizeWordKey),
+);
 
 const ALLOWED_POS = new Set([
   "noun",
@@ -80,11 +87,18 @@ for await (const line of lines) {
   const word = entry.w;
   const lemma = entry.l;
   const pos = entry.p;
-  if (typeof word !== "string" || typeof lemma !== "string" || typeof pos !== "string") {
+  if (
+    typeof word !== "string" ||
+    typeof lemma !== "string" ||
+    typeof pos !== "string"
+  ) {
     continue;
   }
   if (!ALLOWED_POS.has(pos)) continue;
-  if (!words.has(normalizeWordKey(word)) && !words.has(normalizeWordKey(lemma))) {
+  if (
+    !words.has(normalizeWordKey(word)) &&
+    !words.has(normalizeWordKey(lemma))
+  ) {
     continue;
   }
   const key = normalizeWordKey(word);
@@ -115,7 +129,10 @@ const data = {
         key,
         bucket
           .map(({ __dedup, ...entry }) => entry)
-          .sort((left, right) => left.p.localeCompare(right.p) || left.l.localeCompare(right.l)),
+          .sort(
+            (left, right) =>
+              left.p.localeCompare(right.p) || left.l.localeCompare(right.l),
+          ),
       ]),
   ),
 };
@@ -123,4 +140,6 @@ const data = {
 const out = createWriteStream(output);
 out.end(JSON.stringify(data));
 await once(out, "finish");
-console.error(`scanned ${scanned.toLocaleString()} lines, kept ${kept.toLocaleString()} entries for ${entries.size.toLocaleString()} words`);
+console.error(
+  `scanned ${scanned.toLocaleString()} lines, kept ${kept.toLocaleString()} entries for ${entries.size.toLocaleString()} words`,
+);

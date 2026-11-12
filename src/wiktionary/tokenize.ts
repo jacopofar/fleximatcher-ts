@@ -50,6 +50,8 @@ export function tokenizeWords(text: string): WordToken[] {
     }
   }
 
-  tokens.sort((left, right) => left.start - right.start || left.end - right.end);
+  tokens.sort(
+    (left, right) => left.start - right.start || left.end - right.end,
+  );
   return tokens;
 }

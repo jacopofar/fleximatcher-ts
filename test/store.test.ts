@@ -33,9 +33,9 @@ describe("annotations and stores", () => {
     expect(() => new Annotation(2, 2, "x")).toThrow(RangeError);
     expect(() => new Annotation(3, 2, "x")).toThrow(RangeError);
     expect(() => new Annotation(0, 1, "")).toThrow(RangeError);
-    expect(() => new AnnotationStore({ text: "abc" }).addAnnotation(0, 9, "x")).toThrow(
-      /outside the text/,
-    );
+    expect(() =>
+      new AnnotationStore({ text: "abc" }).addAnnotation(0, 9, "x"),
+    ).toThrow(/outside the text/);
   });
 
   it("refuses to attach a different text", () => {

@@ -8,19 +8,22 @@
  * grammars.
  */
 
-import { Annotation, stableKey } from "./annotations.js";
 import type { Annotator, MatchFrame } from "./annotations.js";
+import { Annotation, stableKey } from "./annotations.js";
+import { MaxNestingError, PatternError, UnknownTagError } from "./errors.js";
 import {
-  MaxNestingError,
-  PatternError,
-  UnknownTagError,
-} from "./errors.js";
-import { isRuleChunk, parameter, ruleName, splitPattern, usedTags, usesOptional } from "./expressions.js";
+  isRuleChunk,
+  parameter,
+  ruleName,
+  splitPattern,
+  usedTags,
+  usesOptional,
+} from "./expressions.js";
 import type { CompiledPattern, FlexiMatcher } from "./matcher.js";
 import type { Rule, RuleFactory } from "./rules.js";
 import {
-  AnnotationTemplate,
   type AnnotationSchema,
+  AnnotationTemplate,
   type AnnotationTemplateExpression,
 } from "./templates.js";
 
@@ -253,7 +256,9 @@ export class TagRuleFactory implements RuleFactory {
 
   setMaximumNesting(depth: number): void {
     if (!Number.isInteger(depth) || depth < 0) {
-      throw new RangeError("The maximum nesting level must be a non-negative integer");
+      throw new RangeError(
+        "The maximum nesting level must be a non-negative integer",
+      );
     }
     this.maximumNestingValue = depth;
   }
@@ -291,7 +296,10 @@ export class TagRuleFactory implements RuleFactory {
         `Circular definition of tag ${JSON.stringify(tag)}: ${JSON.stringify(pattern)} cannot be its own production`,
       );
     }
-    return this.addTagDefinition(tag, new RuleDefinition<TData>(pattern, options));
+    return this.addTagDefinition(
+      tag,
+      new RuleDefinition<TData>(pattern, options),
+    );
   }
 
   /** Add an already-built {@link RuleDefinition} for `tag`. */
@@ -427,7 +435,12 @@ export class TagRuleFactory implements RuleFactory {
       if (name === "tag") {
         continue;
       }
-      if (name === "multi" || name === "or" || name === "repeat" || name === "optional") {
+      if (
+        name === "multi" ||
+        name === "or" ||
+        name === "repeat" ||
+        name === "optional"
+      ) {
         if (this.patternUsesDynamicTags(parameter(chunk))) {
           return true;
         }
@@ -632,7 +645,9 @@ export class TagRuleFactory implements RuleFactory {
 
     const limit = Math.max(this.maximumNestingValue, 10);
     if (depth >= limit || stack.has(name)) {
-      const terminals = definitions.filter((definition) => !definition.isRecursive);
+      const terminals = definitions.filter(
+        (definition) => !definition.isRecursive,
+      );
       if (terminals.length > 0) {
         definitions = terminals;
       } else {
@@ -640,7 +655,8 @@ export class TagRuleFactory implements RuleFactory {
       }
     }
 
-    const definition = definitions[Math.floor(Math.random() * definitions.length)];
+    const definition =
+      definitions[Math.floor(Math.random() * definitions.length)];
     const pieces: string[] = [];
     for (const chunk of splitPattern(definition.pattern)) {
       if (!isRuleChunk(chunk)) {

@@ -35,7 +35,11 @@ export function readTagsFromTsvText(
   datasetName = "tsv",
 ): number {
   const normalized = content.replace(/^\uFEFF/, "");
-  return readTagsFromTsvLines(normalized.split(/\r\n|\n|\r/), matcher, datasetName);
+  return readTagsFromTsvLines(
+    normalized.split(/\r\n|\n|\r/),
+    matcher,
+    datasetName,
+  );
 }
 
 /** Load tag productions from an iterable of lines; return how many were inserted. */
@@ -76,7 +80,8 @@ export function readTagsFromTsvLines(
       identifier === null || identifier === ""
         ? `${datasetName}_${lineNumber}`
         : identifier;
-    const effectiveTemplate = template === null || template.trim() === "" ? null : template;
+    const effectiveTemplate =
+      template === null || template.trim() === "" ? null : template;
 
     const replaced = matcher.addTagRule(tag, pattern, {
       identifier: effectiveIdentifier,

@@ -7,27 +7,40 @@
  */
 
 export {
+  Annotation,
+  AnnotationStore,
+  Annotator,
+  type AnnotatorMatchOptions,
+  buildDiagnostics,
+  type CheckSequenceOptions,
+  type CheckSequenceResult,
+  type MatchDiagnostics,
+  MatchFrame,
+  MatchResult,
+  type MissingPart,
+  stableKey,
+  type TagDiagnostics,
+  tagDiagnosticsOf,
+} from "./annotations.js";
+export {
+  type AsyncAnnotateOptions,
+  type AsyncAnnotateResult,
+  type AsyncAnnotationInput,
+  type AsyncMatchOptions,
+  type AsyncMatchResult,
+  type AsyncRuleBinding,
+  type AsyncRuleFactory,
+  annotateAsync,
+  matchesAsync,
+  type PrefetchedRules,
+  prefetchAsyncRules,
+} from "./async.js";
+export {
   Budget,
   BudgetExceededError,
   type BudgetExceededReason,
   type BudgetOptions,
 } from "./budget.js";
-export {
-  Annotation,
-  AnnotationStore,
-  Annotator,
-  MatchFrame,
-  MatchResult,
-  buildDiagnostics,
-  stableKey,
-  tagDiagnosticsOf,
-  type AnnotatorMatchOptions,
-  type CheckSequenceOptions,
-  type CheckSequenceResult,
-  type MatchDiagnostics,
-  type MissingPart,
-  type TagDiagnostics,
-} from "./annotations.js";
 export {
   AnnotationError,
   FlexiMatcherError,
@@ -46,20 +59,30 @@ export {
   usedTags,
 } from "./expressions.js";
 export {
-  CompiledPattern,
-  FlexiMatcher,
   type AnnotateError,
   type AnnotateOptions,
   type AnnotateResult,
   type AnnotateRule,
   type CompiledPart,
+  CompiledPattern,
+  FlexiMatcher,
   type FlexiMatcherOptions,
   type InternalMatchOptions,
   type MatchOptions,
 } from "./matcher.js";
 export {
+  type ProvenanceAnnotationLike,
+  type ProvenanceEdge,
+  ProvenanceGraph,
+  type ProvenanceGraphOptions,
+  type ProvenanceJSON,
+  type ProvenanceNode,
+  type ProvenanceSVGOptions,
+} from "./provenance.js";
+export {
   InsensitiveCaseRule,
   InsensitiveCaseRuleFactory,
+  type InsensitiveCaseRuleFactoryOptions,
   MultiRule,
   MultiRuleFactory,
   OrRule,
@@ -67,52 +90,29 @@ export {
   PlainTextRule,
   RegexRule,
   RegexRuleFactory,
+  type RegexRuleFactoryOptions,
   RepeatRule,
   RepeatRuleFactory,
-  SingleCharRuleFactory,
-  type InsensitiveCaseRuleFactoryOptions,
-  type RegexRuleFactoryOptions,
   type RepeatRuleOptions,
   type Rule,
   type RuleFactory,
+  SingleCharRuleFactory,
 } from "./rules.js";
 export {
-  ProvenanceGraph,
-  type ProvenanceAnnotationLike,
-  type ProvenanceEdge,
-  type ProvenanceGraphOptions,
-  type ProvenanceJSON,
-  type ProvenanceNode,
-  type ProvenanceSVGOptions,
-} from "./provenance.js";
-export {
   RuleDefinition,
+  type RuleDefinitionOptions,
   TagClosureState,
+  type TagClosureStats,
   TagRule,
   TagRuleFactory,
-  type RuleDefinitionOptions,
-  type TagClosureStats,
   type TagRuleOptions,
 } from "./tag.js";
 export {
-  annotateAsync,
-  matchesAsync,
-  prefetchAsyncRules,
-  type AsyncAnnotateOptions,
-  type AsyncAnnotateResult,
-  type AsyncAnnotationInput,
-  type AsyncMatchOptions,
-  type AsyncMatchResult,
-  type AsyncRuleBinding,
-  type AsyncRuleFactory,
-  type PrefetchedRules,
-} from "./async.js";
-export {
-  AnnotationTemplate,
-  PLACEHOLDER_RE,
   type AnnotationSchema,
+  AnnotationTemplate,
   type AnnotationTemplateContext,
   type AnnotationTemplateExpression,
+  PLACEHOLDER_RE,
 } from "./templates.js";
 
 export const VERSION = "0.1.0";

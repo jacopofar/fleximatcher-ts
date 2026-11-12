@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { FlexiMatcher, PatternError } from "../src/index.js";
+import { buildLexicon } from "../src/wiktionary/build.js";
 import {
   entryMatchesQuery,
   loadWiktionaryLexicon,
@@ -13,11 +14,10 @@ import {
   registerWiktionaryRules,
   tokenizeWords,
   transformEntry,
+  type WiktionaryEntry,
   WiktionaryLexicon,
   WiktionaryRuleFactory,
-  type WiktionaryEntry,
 } from "../src/wiktionary/index.js";
-import { buildLexicon } from "../src/wiktionary/build.js";
 
 const fixturePath = fileURLToPath(
   new URL("./fixtures/wiktionary-it.json", import.meta.url),
@@ -38,8 +38,12 @@ describe("Wiktionary lexicon", () => {
     expect(lexicon.language).toBe("it");
     expect(lexicon.languageName).toBe("Italian");
     expect(lexicon.wordCount).toBeGreaterThan(10);
-    expect(lexicon.lookup("Casa").map((entry) => entry.lemma)).toContain("casa");
-    expect(lexicon.lookup("DELL’").map((entry) => entry.word)).toContain("dell'");
+    expect(lexicon.lookup("Casa").map((entry) => entry.lemma)).toContain(
+      "casa",
+    );
+    expect(lexicon.lookup("DELL’").map((entry) => entry.word)).toContain(
+      "dell'",
+    );
     expect(lexicon.lookup("missing")).toEqual([]);
   });
 
@@ -139,18 +143,36 @@ describe("Wiktionary queries", () => {
 describe("Wiktionary rules", () => {
   it("matches word classes and inflections", () => {
     const { matcher } = setup();
-    expect(matcher.matches("La casa è bella", "La [it-noun:feminine singular] è bella").matching).toBe(true);
-    expect(matcher.matches("Le case", "Le [it-noun:feminine plural]").matching).toBe(true);
-    expect(matcher.matches("L'uomo", "L'[it-noun:masculine singular]").matching).toBe(true);
+    expect(
+      matcher.matches(
+        "La casa è bella",
+        "La [it-noun:feminine singular] è bella",
+      ).matching,
+    ).toBe(true);
+    expect(
+      matcher.matches("Le case", "Le [it-noun:feminine plural]").matching,
+    ).toBe(true);
+    expect(
+      matcher.matches("L'uomo", "L'[it-noun:masculine singular]").matching,
+    ).toBe(true);
     expect(
       matcher.matches(
         "dell'acqua",
         "[it-contraction][it-noun:feminine singular]",
       ).matching,
     ).toBe(true);
-    expect(matcher.matches("libere", "[it-adj:feminine plural]").matching).toBe(true);
-    expect(matcher.matches("dà", "[it-verb:third-person singular present indicative]").matching).toBe(true);
-    expect(matcher.matches("dato", "[it-verb:past participle]").matching).toBe(true);
+    expect(matcher.matches("libere", "[it-adj:feminine plural]").matching).toBe(
+      true,
+    );
+    expect(
+      matcher.matches(
+        "dà",
+        "[it-verb:third-person singular present indicative]",
+      ).matching,
+    ).toBe(true);
+    expect(matcher.matches("dato", "[it-verb:past participle]").matching).toBe(
+      true,
+    );
     expect(matcher.matches("sempre", "[it-adv]").matching).toBe(true);
     expect(matcher.matches("Dio", "[it-name]").matching).toBe(true);
     expect(matcher.matches("le", "[it-article]").matching).toBe(true);
@@ -158,7 +180,9 @@ describe("Wiktionary rules", () => {
     expect(matcher.matches("e", "[it-conj]").matching).toBe(true);
     expect(matcher.matches("questo", "[it-det]").matching).toBe(true);
     expect(matcher.matches("egli", "[it-pron]").matching).toBe(true);
-    expect(matcher.matches("lo", "[it-pron:case=accusative]").matching).toBe(true);
+    expect(matcher.matches("lo", "[it-pron:case=accusative]").matching).toBe(
+      true,
+    );
     expect(matcher.matches("gli", "[it-pron:case=dative]").matching).toBe(true);
     expect(matcher.matches("uno", "[it-num]").matching).toBe(true);
   });
@@ -172,14 +196,31 @@ describe("Wiktionary rules", () => {
 
   it("filters by structured features and exclusions", () => {
     const { matcher } = setup();
-    expect(matcher.matches("case", "[it-noun:gender=f number=p]").matching).toBe(true);
-    expect(matcher.matches("case", "[it-noun:gender=f number=p !derived]").matching).toBe(true);
-    expect(matcher.matches("casina", "[it-noun:diminutive]").matching).toBe(true);
-    expect(matcher.matches("casina", "[it-noun:!derived]").matching).toBe(false);
-    expect(matcher.matches("casa", "[it-noun:declension=it-noun:f]").matching).toBe(true);
+    expect(
+      matcher.matches("case", "[it-noun:gender=f number=p]").matching,
+    ).toBe(true);
+    expect(
+      matcher.matches("case", "[it-noun:gender=f number=p !derived]").matching,
+    ).toBe(true);
+    expect(matcher.matches("casina", "[it-noun:diminutive]").matching).toBe(
+      true,
+    );
+    expect(matcher.matches("casina", "[it-noun:!derived]").matching).toBe(
+      false,
+    );
+    expect(
+      matcher.matches("casa", "[it-noun:declension=it-noun:f]").matching,
+    ).toBe(true);
     expect(matcher.matches("case", "[it-noun:lemma=casa]").matching).toBe(true);
-    expect(matcher.matches("liberi", "[it-adj:gender=m|f number=p]").matching).toBe(true);
-    expect(matcher.matches("dà", "[it-verb:person=3 number=s tense=present mood=indicative]").matching).toBe(true);
+    expect(
+      matcher.matches("liberi", "[it-adj:gender=m|f number=p]").matching,
+    ).toBe(true);
+    expect(
+      matcher.matches(
+        "dà",
+        "[it-verb:person=3 number=s tense=present mood=indicative]",
+      ).matching,
+    ).toBe(true);
   });
 
   it("exposes lemma, features and structured fields in annotations", () => {
@@ -189,7 +230,10 @@ describe("Wiktionary rules", () => {
       "[it-verb:third-person singular present indicative]",
       { populateResult: true },
     );
-    const data = result.interpretations?.[0]?.[0]?.data as Record<string, unknown>;
+    const data = result.interpretations?.[0]?.[0]?.data as Record<
+      string,
+      unknown
+    >;
     expect(data).toMatchObject({
       source: "wiktionary",
       language: "it",
@@ -210,7 +254,9 @@ describe("Wiktionary rules", () => {
     expect(sample).toBe("casina");
     const noun = matcher.generateSample("[it-noun]");
     expect(noun).toBeTruthy();
-    expect(lexicon.lookup(noun!).some((entry) => entry.pos === "noun")).toBe(true);
+    expect(lexicon.lookup(noun!).some((entry) => entry.pos === "noun")).toBe(
+      true,
+    );
   });
 
   it("supports custom bindings and a prefixless rule namespace", () => {
@@ -233,8 +279,13 @@ describe("Wiktionary rules", () => {
       JSON.parse(readFileSync(fixturePath, "utf8")),
     );
     const matcher = new FlexiMatcher();
-    matcher.bind("nominal", new WiktionaryRuleFactory(lexicon, { pos: ["noun", "name"] }));
-    expect(matcher.matches("uomini", "[nominal:masculine plural]").matching).toBe(true);
+    matcher.bind(
+      "nominal",
+      new WiktionaryRuleFactory(lexicon, { pos: ["noun", "name"] }),
+    );
+    expect(
+      matcher.matches("uomini", "[nominal:masculine plural]").matching,
+    ).toBe(true);
   });
 });
 
@@ -310,7 +361,12 @@ describe("Wiktextract transformation", () => {
       expect.arrayContaining(["lemma", "infinitive"]),
     );
     expect(byWord.get("dò")?.features).toEqual(
-      expect.arrayContaining(["inflected", "first-person", "present", "singular"]),
+      expect.arrayContaining([
+        "inflected",
+        "first-person",
+        "present",
+        "singular",
+      ]),
     );
     expect(byWord.get("dò")?.features).not.toContain("infinitive");
     expect(byWord.get("dàto")?.features).toEqual(
@@ -326,7 +382,12 @@ describe("Wiktextract transformation", () => {
       lang_code: "it",
       pos: "verb",
       head_templates: [{ name: "it-pp", args: {} }],
-      senses: [{ form_of: [{ word: "barare" }], tags: ["form-of", "participle", "past"] }],
+      senses: [
+        {
+          form_of: [{ word: "barare" }],
+          tags: ["form-of", "participle", "past"],
+        },
+      ],
       forms: [
         { form: "barata", tags: ["feminine"] },
         { form: "barati", tags: ["masculine", "plural"] },
@@ -344,7 +405,13 @@ describe("Wiktextract transformation", () => {
       ]),
     );
     expect(byWord.get("barata")?.features).toEqual(
-      expect.arrayContaining(["inflected", "participle", "past", "feminine", "singular"]),
+      expect.arrayContaining([
+        "inflected",
+        "participle",
+        "past",
+        "feminine",
+        "singular",
+      ]),
     );
   });
 
@@ -451,7 +518,9 @@ describe("Wiktionary builder", () => {
 
       const plain = await loadWiktionaryLexicon(output);
       expect(plain.language).toBe("it");
-      expect(plain.lookup("case").map((entry) => entry.lemma)).toEqual(["casa"]);
+      expect(plain.lookup("case").map((entry) => entry.lemma)).toEqual([
+        "casa",
+      ]);
 
       const gzStats = await buildLexicon({
         input,

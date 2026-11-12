@@ -164,15 +164,14 @@ export class ProvenanceGraph {
       annotation?: ProvenanceAnnotationLike,
     ): ProvenanceNode => {
       const id =
-        annotation?.key ?? `synthetic:${value.start}:${value.end}:${value.type}`;
+        annotation?.key ??
+        `synthetic:${value.start}:${value.end}:${value.type}`;
       let node = graph.nodes.get(id);
       if (node !== undefined) {
         return node;
       }
       const data = annotation?.data;
-      const explanation = annotation === undefined
-        ? null
-        : explanationOf(data);
+      const explanation = annotation === undefined ? null : explanationOf(data);
       node = {
         id,
         type: annotation?.type ?? value.type,
@@ -209,10 +208,7 @@ export class ProvenanceGraph {
       graph.edges.push({ from: parent.id, to: child.id });
     };
 
-    const addChildren = (
-      parent: ProvenanceNode,
-      children: unknown[],
-    ): void => {
+    const addChildren = (parent: ProvenanceNode, children: unknown[]): void => {
       for (const raw of children) {
         const child = toChild(raw);
         if (child === null) continue;
@@ -410,8 +406,7 @@ export class ProvenanceGraph {
         }
         laneEnds[lane] = node.end;
         const charLength = Math.max(this.text.length, 1);
-        const x =
-          margin + (node.start / charLength) * (width - margin * 2);
+        const x = margin + (node.start / charLength) * (width - margin * 2);
         const w = Math.max(
           8,
           ((node.end - node.start) / charLength) * (width - margin * 2),
@@ -457,7 +452,10 @@ export class ProvenanceGraph {
         `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h}" rx="5" fill="hsl(${hue} 72% 52% / 0.22)" stroke="hsl(${hue} 65% 44%)" stroke-width="1.5"/>`,
       );
       if (w > 48) {
-        const label = node.type.length > Math.floor(w / 6) ? node.type.slice(0, Math.floor(w / 6)) : node.type;
+        const label =
+          node.type.length > Math.floor(w / 6)
+            ? node.type.slice(0, Math.floor(w / 6))
+            : node.type;
         parts.push(
           `<text x="${(x + 4).toFixed(1)}" y="${(y + 14).toFixed(1)}" font-family="monospace" font-size="9" fill="#25211c">${escapeXml(label)}</text>`,
         );

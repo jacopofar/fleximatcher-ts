@@ -2,8 +2,7 @@
  * Wiktionary-backed annotators for fleximatcher.
  */
 
-import type { Annotator } from "../annotations.js";
-import type { AnnotationStore } from "../annotations.js";
+import type { AnnotationStore, Annotator } from "../annotations.js";
 import type { FlexiMatcher } from "../matcher.js";
 import type { Rule, RuleFactory } from "../rules.js";
 import type { WiktionaryEntry, WiktionaryLexicon } from "./lexicon.js";
@@ -46,7 +45,10 @@ function tokensFor(store: AnnotationStore, text: string): readonly WordToken[] {
     }
   }
   const tokens = tokenizeWords(text);
-  store.extras.set("wiktionary_tokens", { text, tokens } satisfies WiktionaryTokenCache);
+  store.extras.set("wiktionary_tokens", {
+    text,
+    tokens,
+  } satisfies WiktionaryTokenCache);
   return tokens;
 }
 
@@ -54,7 +56,8 @@ function annotationData(
   entry: WiktionaryEntry,
   language: string,
   covered: string,
-): Record<string, unknown> {  const data: Record<string, unknown> = {
+): Record<string, unknown> {
+  const data: Record<string, unknown> = {
     source: "wiktionary",
     language,
     word: covered,

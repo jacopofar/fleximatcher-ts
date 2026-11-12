@@ -1,13 +1,13 @@
 import {
+  type Annotation,
   AnnotationStore,
   FlexiMatcher,
   ProvenanceGraph,
   splitPattern,
-  type Annotation,
 } from "fleximatcher";
 import {
-  WiktionaryLexicon,
   registerWiktionaryRules,
+  WiktionaryLexicon,
   type WiktionaryLexiconData,
 } from "fleximatcher/wiktionary/browser";
 
@@ -134,7 +134,11 @@ const ANNOTATORS: AnnotatorDescriptor[] = [
   { expression: "[it-verb]", label: "Verb", group: "Word classes" },
   { expression: "[it-adv]", label: "Adverb", group: "Word classes" },
   { expression: "[it-article]", label: "Article", group: "Function words" },
-  { expression: "[it-contraction]", label: "Contraction", group: "Function words" },
+  {
+    expression: "[it-contraction]",
+    label: "Contraction",
+    group: "Function words",
+  },
   { expression: "[it-prep]", label: "Preposition", group: "Function words" },
   { expression: "[it-conj]", label: "Conjunction", group: "Function words" },
   { expression: "[it-pron]", label: "Pronoun", group: "Function words" },
@@ -398,7 +402,10 @@ function parseTags(source: string): TagDefinition[] {
   return tags;
 }
 
-function serializeAnnotation(annotation: Annotation, text: string): SerializedAnnotation {
+function serializeAnnotation(
+  annotation: Annotation,
+  text: string,
+): SerializedAnnotation {
   return {
     start: annotation.start,
     end: annotation.end,
@@ -477,7 +484,11 @@ function explanationOfData(data: unknown): Explanation | null {
   return record === null ? null : toExplanation(record.__explain);
 }
 
-function hierarchyKey(value: { start: number; end: number; type: string }): string {
+function hierarchyKey(value: {
+  start: number;
+  end: number;
+  type: string;
+}): string {
   return `${value.start}:${value.end}:${value.type}`;
 }
 
@@ -535,9 +546,7 @@ function buildChildNode(
     explanation === null || cycle
       ? []
       : explanation.children
-          .map((nested) =>
-            buildChildNode(nested, annotations, text, nextPath),
-          )
+          .map((nested) => buildChildNode(nested, annotations, text, nextPath))
           .filter((node): node is HierarchyNode => node !== null);
   return {
     type: child.type,
@@ -566,9 +575,7 @@ function buildAnnotationNode(
     explanation === null
       ? []
       : explanation.children
-          .map((child) =>
-            buildChildNode(child, annotations, text, nextPath),
-          )
+          .map((child) => buildChildNode(child, annotations, text, nextPath))
           .filter((node): node is HierarchyNode => node !== null);
   return {
     type: annotation.type,
@@ -602,20 +609,11 @@ function buildHierarchy(result: RunResult, text: string): HierarchyResult {
   const roots: HierarchyNode[] = [];
   result.annotations.forEach((annotation, index) => {
     const explanation = explanationOfData(annotation.data);
-    if (
-      explanation === null ||
-      childKeys.has(hierarchyKey(annotation))
-    ) {
+    if (explanation === null || childKeys.has(hierarchyKey(annotation))) {
       return;
     }
     roots.push(
-      buildAnnotationNode(
-        annotation,
-        index,
-        annotations,
-        text,
-        new Set(),
-      ),
+      buildAnnotationNode(annotation, index, annotations, text, new Set()),
     );
   });
   if (roots.length > 0) {
@@ -628,26 +626,30 @@ function buildHierarchy(result: RunResult, text: string): HierarchyResult {
       if (interpretation.annotations.length === 0) {
         continue;
       }
-      const children = interpretation.annotations.map((annotation) => {
-        const found = annotations.get(hierarchyKey(annotation));
-        return found === undefined
-          ? leafNode(annotation, text)
-          : buildAnnotationNode(
-              found.annotation,
-              found.index,
-              annotations,
-              text,
-              new Set(),
-            );
-      }).filter((node) => node.type.startsWith("[") || node.children.length > 0);
+      const children = interpretation.annotations
+        .map((annotation) => {
+          const found = annotations.get(hierarchyKey(annotation));
+          return found === undefined
+            ? leafNode(annotation, text)
+            : buildAnnotationNode(
+                found.annotation,
+                found.index,
+                annotations,
+                text,
+                new Set(),
+              );
+        })
+        .filter(
+          (node) => node.type.startsWith("[") || node.children.length > 0,
+        );
       const start = interpretation.annotations[0].start;
-      const end = interpretation.annotations[interpretation.annotations.length - 1].end;
+      const end =
+        interpretation.annotations[interpretation.annotations.length - 1].end;
       interpretationRoots.push({
         type: "match",
         start,
         end,
-        covered:
-          interpretation.covered || text.slice(start, end),
+        covered: interpretation.covered || text.slice(start, end),
         children,
       });
     }
@@ -666,7 +668,10 @@ function buildProvenanceIndex(roots: HierarchyNode[]): ProvenanceIndex {
       ...path,
       { type: node.type, id: node.explanationId ?? null },
     ];
-    if (node.annotationIndex !== undefined && !index.has(node.annotationIndex)) {
+    if (
+      node.annotationIndex !== undefined &&
+      !index.has(node.annotationIndex)
+    ) {
       index.set(node.annotationIndex, next);
     }
     for (const child of node.children) {
@@ -697,7 +702,10 @@ function runClient(): RunResult {
   const started = performance.now();
   const tags = parseTags(state.tags);
   const matcher = buildClientMatcher(tags);
-  const store = new AnnotationStore({ text: state.text, explain: state.explain });
+  const store = new AnnotationStore({
+    text: state.text,
+    explain: state.explain,
+  });
   const errors: string[] = [];
   const literalTypes = literalPatternChunks(state.pattern);
 
@@ -808,7 +816,8 @@ async function run(): Promise<void> {
   if (state.mode === "server" && !state.serverAvailable) {
     await refreshServerStatus();
     if (!state.serverAvailable) {
-      state.error = "The Wiktionary server is not reachable. Start `node web/server.mjs`.";
+      state.error =
+        "The Wiktionary server is not reachable. Start `node web/server.mjs`.";
       renderErrors();
       return;
     }
@@ -871,7 +880,9 @@ function solidColor(annotation: SerializedAnnotation): string {
 }
 
 function segmentBackground(annotations: SerializedAnnotation[]): string {
-  const colors = annotations.slice(0, 3).map((annotation) => colorFor(annotation, 0.32));
+  const colors = annotations
+    .slice(0, 3)
+    .map((annotation) => colorFor(annotation, 0.32));
   if (colors.length === 1) {
     return colors[0];
   }
@@ -881,10 +892,15 @@ function segmentBackground(annotations: SerializedAnnotation[]): string {
   return `linear-gradient(90deg, ${colors[0]} 0 33.3%, ${colors[1]} 33.3% 66.6%, ${colors[2]} 66.6% 100%)`;
 }
 
-function renderAnnotatedText(text: string, annotations: SerializedAnnotation[]): void {
+function renderAnnotatedText(
+  text: string,
+  annotations: SerializedAnnotation[],
+): void {
   annotatedText.replaceChildren();
   if (text.length === 0) {
-    annotatedText.append(el("span", "empty-state", "Write some text to annotate."));
+    annotatedText.append(
+      el("span", "empty-state", "Write some text to annotate."),
+    );
     return;
   }
   if (annotations.length === 0) {
@@ -905,7 +921,9 @@ function renderAnnotatedText(text: string, annotations: SerializedAnnotation[]):
     if (end <= start) continue;
     const active = annotations
       .map((annotation, annotationIndex) => ({ annotation, annotationIndex }))
-      .filter(({ annotation }) => annotation.start < end && annotation.end > start);
+      .filter(
+        ({ annotation }) => annotation.start < end && annotation.end > start,
+      );
 
     if (active.length === 0) {
       annotatedText.append(document.createTextNode(text.slice(start, end)));
@@ -913,7 +931,9 @@ function renderAnnotatedText(text: string, annotations: SerializedAnnotation[]):
     }
 
     const span = el("span", "seg", text.slice(start, end));
-    span.style.background = segmentBackground(active.map((item) => item.annotation));
+    span.style.background = segmentBackground(
+      active.map((item) => item.annotation),
+    );
     span.style.boxShadow = `inset 0 -2px 0 ${solidColor(active[0].annotation)}`;
     span.dataset.annIds = active.map((item) => item.annotationIndex).join(",");
     span.title = active.map((item) => item.annotation.type).join(" | ");
@@ -946,7 +966,11 @@ function renderAnnotations(
   annCount.textContent = String(result.annotations.length);
   if (result.annotations.length === 0) {
     annotationList.append(
-      el("p", "empty-state", "No annotations yet. Try another annotator or text."),
+      el(
+        "p",
+        "empty-state",
+        "No annotations yet. Try another annotator or text.",
+      ),
     );
     return;
   }
@@ -995,7 +1019,11 @@ function renderAnnotations(
         }
         if (features.length > visible.length) {
           featureRow.append(
-            el("span", "feature feature--more", `+${features.length - visible.length}`),
+            el(
+              "span",
+              "feature feature--more",
+              `+${features.length - visible.length}`,
+            ),
           );
         }
         card.append(featureRow);
@@ -1180,8 +1208,7 @@ function renderFlame(roots: HierarchyNode[], text: string): HTMLDivElement {
     const laneEnds: number[] = [];
     for (const item of items.sort(
       (left, right) =>
-        left.node.start - right.node.start ||
-        right.node.end - left.node.end,
+        left.node.start - right.node.start || right.node.end - left.node.end,
     )) {
       let lane = laneEnds.findIndex((end) => end <= item.node.start);
       if (lane === -1) {
@@ -1234,11 +1261,7 @@ function renderFlame(roots: HierarchyNode[], text: string): HTMLDivElement {
     bar.style.borderLeftColor = hierarchySolid(node);
     bar.textContent =
       node.type === "match" ? `match · ${node.covered}` : node.type;
-    const parts = [
-      node.type,
-      `[${node.start}:${node.end}]`,
-      node.covered,
-    ];
+    const parts = [node.type, `[${node.start}:${node.end}]`, node.covered];
     if (node.explanationId) {
       parts.push(`via ${node.explanationId}`);
     }
@@ -1275,9 +1298,7 @@ function renderHierarchyTree(roots: HierarchyNode[]): HTMLDivElement {
     button.append(el("code", "hierarchy-type", node.type));
     button.append(el("span", "hierarchy-covered", node.covered));
     if (node.explanationId) {
-      button.append(
-        el("span", "hierarchy-id", `via ${node.explanationId}`),
-      );
+      button.append(el("span", "hierarchy-id", `via ${node.explanationId}`));
     }
     if (node.annotationIndex === undefined) {
       button.disabled = true;
@@ -1304,10 +1325,7 @@ function renderHierarchyTree(roots: HierarchyNode[]): HTMLDivElement {
   return container;
 }
 
-function renderHierarchy(
-  result: RunResult,
-  prebuilt?: HierarchyResult,
-): void {
+function renderHierarchy(result: RunResult, prebuilt?: HierarchyResult): void {
   const built = prebuilt ?? buildHierarchy(result, state.text);
   hierarchy.replaceChildren();
 
@@ -1355,7 +1373,9 @@ function loadDemoGrammar(): void {
 
 function setActiveAnnotation(index: number): void {
   const wanted = String(index);
-  for (const card of annotationList.querySelectorAll<HTMLElement>(".ann-card")) {
+  for (const card of annotationList.querySelectorAll<HTMLElement>(
+    ".ann-card",
+  )) {
     card.classList.toggle("is-active", card.dataset.annIndex === wanted);
   }
   for (const segment of annotatedText.querySelectorAll<HTMLElement>(".seg")) {
@@ -1365,7 +1385,9 @@ function setActiveAnnotation(index: number): void {
   for (const bar of hierarchy.querySelectorAll<HTMLElement>(".flame-bar")) {
     bar.classList.toggle("is-active", bar.dataset.annIndex === wanted);
   }
-  for (const node of hierarchy.querySelectorAll<HTMLElement>(".hierarchy-node")) {
+  for (const node of hierarchy.querySelectorAll<HTMLElement>(
+    ".hierarchy-node",
+  )) {
     node.classList.toggle("is-active", node.dataset.annIndex === wanted);
   }
   const active = annotationList.querySelector<HTMLElement>(
@@ -1386,7 +1408,8 @@ function renderResult(result: RunResult): void {
   const provenance = buildProvenanceIndex(hierarchyResult.roots);
   const graph = ProvenanceGraph.fromAnnotations(result.annotations, state.text);
   state.provenanceGraph = graph;
-  const sourceLabel = result.source === "client" ? clientLexiconLabel : "Wiktionary server";
+  const sourceLabel =
+    result.source === "client" ? clientLexiconLabel : "Wiktionary server";
   stats.textContent = `${result.annotations.length} annotations · ${result.interpretations.length} interpretations · ${result.elapsedMs.toFixed(1)} ms · ${sourceLabel}`;
   renderErrors();
   renderAnnotatedText(state.text, result.annotations);
@@ -1418,7 +1441,8 @@ function renderAnnotatorChips(): void {
     groups.set(descriptor.group, bucket);
   }
   const custom = [...state.selected].filter(
-    (expression) => !ANNOTATORS.some((descriptor) => descriptor.expression === expression),
+    (expression) =>
+      !ANNOTATORS.some((descriptor) => descriptor.expression === expression),
   );
   if (custom.length > 0) {
     groups.set(
@@ -1591,12 +1615,15 @@ async function exportProvenancePng(): Promise<void> {
     const image = new Image();
     await new Promise<void>((resolve, reject) => {
       image.onload = () => resolve();
-      image.onerror = () => reject(new Error("Could not render provenance SVG"));
+      image.onerror = () =>
+        reject(new Error("Could not render provenance SVG"));
       image.src = url;
     });
     const documentNode = new DOMParser().parseFromString(svg, "image/svg+xml");
-    const width = Number(documentNode.documentElement.getAttribute("width")) || 1400;
-    const height = Number(documentNode.documentElement.getAttribute("height")) || 600;
+    const width =
+      Number(documentNode.documentElement.getAttribute("width")) || 1400;
+    const height =
+      Number(documentNode.documentElement.getAttribute("height")) || 600;
     const scale = 2;
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(width * scale);
@@ -1649,7 +1676,10 @@ customAnnotator.addEventListener("keydown", (event) => {
     addCustomAnnotator();
   }
 });
-$<HTMLButtonElement>("#add-annotator").addEventListener("click", addCustomAnnotator);
+$<HTMLButtonElement>("#add-annotator").addEventListener(
+  "click",
+  addCustomAnnotator,
+);
 
 function addCustomAnnotator(): void {
   const chunk = normalizeAnnotator(customAnnotator.value);
@@ -1663,7 +1693,10 @@ $<HTMLButtonElement>("#run-button").addEventListener("click", () => {
   void run();
 });
 $<HTMLButtonElement>("#export-run").addEventListener("click", exportRun);
-$<HTMLButtonElement>("#export-svg").addEventListener("click", exportProvenanceSvg);
+$<HTMLButtonElement>("#export-svg").addEventListener(
+  "click",
+  exportProvenanceSvg,
+);
 $<HTMLButtonElement>("#export-png").addEventListener("click", () => {
   void exportProvenancePng();
 });
@@ -1681,7 +1714,10 @@ $<HTMLButtonElement>("#sample-pattern").addEventListener("click", () => {
   state.pattern = SAMPLE_PATTERN;
   patternInput.value = SAMPLE_PATTERN;
 });
-$<HTMLButtonElement>("#demo-grammar").addEventListener("click", loadDemoGrammar);
+$<HTMLButtonElement>("#demo-grammar").addEventListener(
+  "click",
+  loadDemoGrammar,
+);
 $<HTMLButtonElement>("#clear-button").addEventListener("click", () => {
   state.text = "";
   state.pattern = "";
@@ -1718,22 +1754,25 @@ $<HTMLInputElement>("#tags-file").addEventListener("change", async (event) => {
   state.tags = tagsInput.value;
 });
 
-$<HTMLInputElement>("#lexicon-file").addEventListener("change", async (event) => {
-  const file = (event.currentTarget as HTMLInputElement).files?.[0];
-  if (!file) return;
-  try {
-    const data = JSON.parse(await file.text()) as WiktionaryLexiconData;
-    clientLexicon = WiktionaryLexicon.fromData(data);
-    clientLexiconLabel = file.name;
-    updateLexiconHint();
-    renderStatus();
-    state.error = "";
-    renderErrors();
-  } catch (error) {
-    state.error = `Could not load lexicon: ${error instanceof Error ? error.message : String(error)}`;
-    renderErrors();
-  }
-});
+$<HTMLInputElement>("#lexicon-file").addEventListener(
+  "change",
+  async (event) => {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text()) as WiktionaryLexiconData;
+      clientLexicon = WiktionaryLexicon.fromData(data);
+      clientLexiconLabel = file.name;
+      updateLexiconHint();
+      renderStatus();
+      state.error = "";
+      renderErrors();
+    } catch (error) {
+      state.error = `Could not load lexicon: ${error instanceof Error ? error.message : String(error)}`;
+      renderErrors();
+    }
+  },
+);
 
 // Initial paint and demo run.
 renderAnnotatorChips();

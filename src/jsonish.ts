@@ -22,7 +22,20 @@ export class JsonishError extends Error {
 }
 
 const WHITESPACE = " \t\r\n";
-const END_OF_BARE = new Set([",", ":", "]", "}", "/", "\\", '"', "[", "{", ";", "=", "#"]);
+const END_OF_BARE = new Set([
+  ",",
+  ":",
+  "]",
+  "}",
+  "/",
+  "\\",
+  '"',
+  "[",
+  "{",
+  ";",
+  "=",
+  "#",
+]);
 const NUMBER_RE = /[-+]?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/y;
 
 /**

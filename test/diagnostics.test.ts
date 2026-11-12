@@ -58,9 +58,9 @@ describe("match diagnostics", () => {
     expect(tags.visitedTags).toBeGreaterThan(0);
     expect(tags.maxDepth).toBe(1);
     expect(tags.prunedByDepth).toBeGreaterThan(0);
-    expect(result.diagnostics.warnings.some((warning) =>
-      warning.includes("pruned"),
-    )).toBe(true);
+    expect(
+      result.diagnostics.warnings.some((warning) => warning.includes("pruned")),
+    ).toBe(true);
   });
 
   it("reports aborted budgets as a constraint", () => {

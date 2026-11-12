@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   AnnotationStore,
+  type AsyncRuleFactory,
   annotateAsync,
   FlexiMatcher,
   matchesAsync,
   prefetchAsyncRules,
   RuleError,
-  type AsyncRuleFactory,
   type RuleFactory,
 } from "../src/index.js";
 
@@ -30,21 +30,16 @@ describe("async rule adapter", () => {
       template: { kind: "animal" },
     });
 
-    const result = await matchesAsync(
-      matcher,
-      "a dog",
-      "[tag:animal]",
-      {
-        matchWhole: false,
-        asyncRules: [
-          {
-            name: "remote-pos",
-            factory: asyncPosFactory(),
-            parameters: ["NOUN"],
-          },
-        ],
-      },
-    );
+    const result = await matchesAsync(matcher, "a dog", "[tag:animal]", {
+      matchWhole: false,
+      asyncRules: [
+        {
+          name: "remote-pos",
+          factory: asyncPosFactory(),
+          parameters: ["NOUN"],
+        },
+      ],
+    });
 
     expect(result.matching).toBe(true);
     expect(result.store.ofType("[remote-pos:NOUN]")).toHaveLength(1);

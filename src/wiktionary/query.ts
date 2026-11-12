@@ -13,8 +13,15 @@
  */
 
 import { PatternError } from "../errors.js";
-import { normalizeFeature, normalizeGender, normalizeNumber, normalizePerson, normalizePos, normalizeWordKey } from "./normalize.js";
 import type { WiktionaryEntry } from "./lexicon.js";
+import {
+  normalizeFeature,
+  normalizeGender,
+  normalizeNumber,
+  normalizePerson,
+  normalizePos,
+  normalizeWordKey,
+} from "./normalize.js";
 
 export interface WiktionaryQuery {
   readonly features: readonly string[];
@@ -60,28 +67,36 @@ function normalizeField(key: string): string {
 function normalizeFieldValue(field: string, value: string): string {
   const trimmed = value.trim();
   if (!trimmed) {
-    throw new PatternError(`Empty value for Wiktionary query field ${JSON.stringify(field)}`);
+    throw new PatternError(
+      `Empty value for Wiktionary query field ${JSON.stringify(field)}`,
+    );
   }
 
   switch (field) {
     case "gender": {
       const normalized = normalizeGender(trimmed);
       if (normalized === undefined) {
-        throw new PatternError(`Invalid gender ${JSON.stringify(value)}; use m, f or mf`);
+        throw new PatternError(
+          `Invalid gender ${JSON.stringify(value)}; use m, f or mf`,
+        );
       }
       return normalized;
     }
     case "number": {
       const normalized = normalizeNumber(trimmed);
       if (normalized === undefined) {
-        throw new PatternError(`Invalid number ${JSON.stringify(value)}; use s or p`);
+        throw new PatternError(
+          `Invalid number ${JSON.stringify(value)}; use s or p`,
+        );
       }
       return normalized;
     }
     case "person": {
       const normalized = normalizePerson(trimmed);
       if (normalized === undefined) {
-        throw new PatternError(`Invalid person ${JSON.stringify(value)}; use 1, 2 or 3`);
+        throw new PatternError(
+          `Invalid person ${JSON.stringify(value)}; use 1, 2 or 3`,
+        );
       }
       return normalized;
     }
@@ -121,7 +136,9 @@ export function parseWiktionaryQuery(parameter: string): WiktionaryQuery {
       token = token.slice(1);
     }
     if (!token) {
-      throw new PatternError(`Empty Wiktionary query token ${JSON.stringify(rawToken)}`);
+      throw new PatternError(
+        `Empty Wiktionary query token ${JSON.stringify(rawToken)}`,
+      );
     }
 
     const equals = token.indexOf("=");
@@ -146,7 +163,9 @@ export function parseWiktionaryQuery(parameter: string): WiktionaryQuery {
     target[field] = bucket;
   }
 
-  const freezeFields = (source: Record<string, Set<string>>): Record<string, readonly string[]> =>
+  const freezeFields = (
+    source: Record<string, Set<string>>,
+  ): Record<string, readonly string[]> =>
     Object.fromEntries(
       Object.entries(source).map(([key, values]) => [key, [...values]]),
     );
@@ -159,7 +178,11 @@ export function parseWiktionaryQuery(parameter: string): WiktionaryQuery {
   };
 }
 
-function fieldMatches(entry: WiktionaryEntry, field: string, value: string): boolean {
+function fieldMatches(
+  entry: WiktionaryEntry,
+  field: string,
+  value: string,
+): boolean {
   switch (field) {
     case "feature":
       return entry.features.includes(value);
@@ -195,7 +218,10 @@ function fieldMatches(entry: WiktionaryEntry, field: string, value: string): boo
 }
 
 /** Whether an entry satisfies a parsed query. */
-export function entryMatchesQuery(entry: WiktionaryEntry, query: WiktionaryQuery): boolean {
+export function entryMatchesQuery(
+  entry: WiktionaryEntry,
+  query: WiktionaryQuery,
+): boolean {
   for (const feature of query.features) {
     if (!entry.features.includes(feature)) {
       return false;

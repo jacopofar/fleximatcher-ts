@@ -31,7 +31,7 @@
 
 import type { Annotation } from "./annotations.js";
 import { AnnotationError } from "./errors.js";
-import { loads, JsonishError } from "./jsonish.js";
+import { JsonishError, loads } from "./jsonish.js";
 
 /** Context passed to function templates. */
 export interface AnnotationTemplateContext {
@@ -74,11 +74,17 @@ function parsePath(path: string): Array<string | number> {
     if (character === ".") {
       index += 1;
       const start = index;
-      while (index < path.length && path[index] !== "." && path[index] !== "[") {
+      while (
+        index < path.length &&
+        path[index] !== "." &&
+        path[index] !== "["
+      ) {
         index += 1;
       }
       if (start === index) {
-        throw new AnnotationError(`Empty path segment in placeholder path ${JSON.stringify(path)}`);
+        throw new AnnotationError(
+          `Empty path segment in placeholder path ${JSON.stringify(path)}`,
+        );
       }
       entries.push(path.slice(start, index));
       continue;
@@ -91,7 +97,9 @@ function parsePath(path: string): Array<string | number> {
         index += 1;
       }
       if (index >= path.length) {
-        throw new AnnotationError(`Unclosed '[' in placeholder path ${JSON.stringify(path)}`);
+        throw new AnnotationError(
+          `Unclosed '[' in placeholder path ${JSON.stringify(path)}`,
+        );
       }
       const raw = path.slice(start, index);
       if (!/^[0-9]+$/.test(raw)) {
@@ -108,11 +116,17 @@ function parsePath(path: string): Array<string | number> {
     // value(1, "name") instead of value(1, ".name").
     if (index === 0) {
       const start = index;
-      while (index < path.length && path[index] !== "." && path[index] !== "[") {
+      while (
+        index < path.length &&
+        path[index] !== "." &&
+        path[index] !== "["
+      ) {
         index += 1;
       }
       if (start === index) {
-        throw new AnnotationError(`Empty path segment in placeholder path ${JSON.stringify(path)}`);
+        throw new AnnotationError(
+          `Empty path segment in placeholder path ${JSON.stringify(path)}`,
+        );
       }
       entries.push(path.slice(start, index));
       continue;
@@ -161,7 +175,7 @@ function lookup(
         `Cannot find ${JSON.stringify(path)} in the annotation of element #${index}`,
       );
     }
-    if (!Object.prototype.hasOwnProperty.call(value, entry)) {
+    if (!Object.hasOwn(value, entry)) {
       throw new AnnotationError(
         `Cannot find ${JSON.stringify(path)} in the annotation of element #${index}: missing key ${JSON.stringify(entry)}`,
       );
@@ -174,7 +188,9 @@ function lookup(
 
 function jsonStringContent(value: unknown, quote: string): string {
   const asText =
-    typeof value === "string" ? value : (JSON.stringify(value) ?? String(value));
+    typeof value === "string"
+      ? value
+      : (JSON.stringify(value) ?? String(value));
   let escaped = JSON.stringify(asText).slice(1, -1);
   if (quote === "'") {
     escaped = escaped.replace(/'/g, "\\'");
@@ -284,12 +300,14 @@ export class AnnotationTemplate<TData = unknown> {
       const context: AnnotationTemplateContext = {
         text,
         sequence,
-        covered: (index: number) => lookup(sequence, index, "").annotation.coveredText(text),
-        value: (index: number, path = "") => lookup(sequence, index, path).value,
+        covered: (index: number) =>
+          lookup(sequence, index, "").annotation.coveredText(text),
+        value: (index: number, path = "") =>
+          lookup(sequence, index, path).value,
       };
-      const result = (this.expression as (context: AnnotationTemplateContext) => unknown)(
-        context,
-      );
+      const result = (
+        this.expression as (context: AnnotationTemplateContext) => unknown
+      )(context);
       if (result !== null && typeof result === "object" && "then" in result) {
         throw new AnnotationError("Annotation templates must be synchronous");
       }
@@ -312,7 +330,9 @@ export class AnnotationTemplate<TData = unknown> {
       }
     }
 
-    return this.applySchema(this.substituteNative(this.expression, text, sequence));
+    return this.applySchema(
+      this.substituteNative(this.expression, text, sequence),
+    );
   }
 
   private applySchema(value: unknown): TData {
@@ -363,8 +383,10 @@ export class AnnotationTemplate<TData = unknown> {
       const index = Number.parseInt(match[1], 10);
       const path = match[2] ?? "";
       const found = lookup(sequence, index, path);
-      const value = path === "" ? found.annotation.coveredText(text) : found.value;
-      const rendered = quote !== null ? jsonStringContent(value, quote) : jsonLiteral(value);
+      const value =
+        path === "" ? found.annotation.coveredText(text) : found.value;
+      const rendered =
+        quote !== null ? jsonStringContent(value, quote) : jsonLiteral(value);
 
       pieces.push(template.slice(position, matchIndex));
       pieces.push(rendered);
@@ -389,19 +411,27 @@ export class AnnotationTemplate<TData = unknown> {
         return path === "" ? found.annotation.coveredText(text) : found.value;
       }
 
-      return value.replace(PLACEHOLDER_RE, (whole, rawIndex: string, path: string) => {
-        const found = lookup(sequence, Number.parseInt(rawIndex, 10), path ?? "");
-        const extracted = path === "" ? found.annotation.coveredText(text) : found.value;
-        if (typeof extracted === "string") {
-          return extracted;
-        }
-        if (extracted === undefined) {
-          return "";
-        }
-        return typeof extracted === "object"
-          ? (JSON.stringify(extracted) ?? String(extracted))
-          : String(extracted);
-      });
+      return value.replace(
+        PLACEHOLDER_RE,
+        (_whole, rawIndex: string, path: string) => {
+          const found = lookup(
+            sequence,
+            Number.parseInt(rawIndex, 10),
+            path ?? "",
+          );
+          const extracted =
+            path === "" ? found.annotation.coveredText(text) : found.value;
+          if (typeof extracted === "string") {
+            return extracted;
+          }
+          if (extracted === undefined) {
+            return "";
+          }
+          return typeof extracted === "object"
+            ? (JSON.stringify(extracted) ?? String(extracted))
+            : String(extracted);
+        },
+      );
     }
 
     if (Array.isArray(value)) {

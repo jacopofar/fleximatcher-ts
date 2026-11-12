@@ -64,7 +64,10 @@ export function normalizeGender(value: string): string | undefined {
   if (!normalized) {
     return undefined;
   }
-  if (normalized.includes("mf") || (normalized.includes("m") && normalized.includes("f"))) {
+  if (
+    normalized.includes("mf") ||
+    (normalized.includes("m") && normalized.includes("f"))
+  ) {
     return "mf";
   }
   if (normalized.includes("m")) {

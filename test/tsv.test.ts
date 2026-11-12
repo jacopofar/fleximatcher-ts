@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { FlexiMatcher, readTagsFromTsvLines, readTagsFromTsvText } from "../src/index.js";
+import {
+  FlexiMatcher,
+  readTagsFromTsvLines,
+  readTagsFromTsvText,
+} from "../src/index.js";
 
 describe("TSV loading", () => {
   it("loads two, three and four-column productions", () => {
@@ -21,10 +25,16 @@ describe("TSV loading", () => {
     expect(matcher.tagNames).toEqual(["fruit"]);
     expect(matcher.tagDefinitions("fruit")).toHaveLength(3);
     expect(matcher.getTagRule("fruit", "dataset_3")?.pattern).toBe("pear");
-    expect(matcher.getTagRule("fruit", "dataset_4")?.pattern).toBe("an [tag:fruit]");
-    expect(matcher.getTagRule("fruit", "id_a_fruit")?.pattern).toBe("a [tag:fruit]");
+    expect(matcher.getTagRule("fruit", "dataset_4")?.pattern).toBe(
+      "an [tag:fruit]",
+    );
+    expect(matcher.getTagRule("fruit", "id_a_fruit")?.pattern).toBe(
+      "a [tag:fruit]",
+    );
 
-    const result = matcher.matches("a pear", "[tag:fruit]", { populateResult: true });
+    const result = matcher.matches("a pear", "[tag:fruit]", {
+      populateResult: true,
+    });
     expect(result.matching).toBe(true);
     expect(result.interpretations?.[0]?.[0]?.data).toEqual({ article: "a " });
   });
@@ -40,15 +50,17 @@ describe("TSV loading", () => {
   it("treats an empty template column as no annotation", () => {
     const matcher = new FlexiMatcher();
     readTagsFromTsvText("fruit\tpear\tid_pear\t", matcher, "dataset");
-    const result = matcher.matches("pear", "[tag:fruit]", { populateResult: true });
+    const result = matcher.matches("pear", "[tag:fruit]", {
+      populateResult: true,
+    });
     expect(result.interpretations?.[0]?.[0]?.data).toBeUndefined();
   });
 
   it("rejects lines with an impossible number of columns", () => {
     const matcher = new FlexiMatcher();
-    expect(() => readTagsFromTsvText("only-one-column", matcher, "dataset")).toThrow(
-      /expected 2/,
-    );
+    expect(() =>
+      readTagsFromTsvText("only-one-column", matcher, "dataset"),
+    ).toThrow(/expected 2/);
     expect(() =>
       readTagsFromTsvText("a\tb\tc\td\te", matcher, "dataset"),
     ).toThrow(/5 columns/);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 /**
  * Fleximatcher playground server.
  *
@@ -13,13 +14,17 @@
  *   WIKTIONARY_LEXICON=data/wiktionary-it.jsonl.gz
  */
 
-import { createServer } from "node:http";
 import { createReadStream, existsSync } from "node:fs";
 import { stat } from "node:fs/promises";
+import { createServer } from "node:http";
 import { extname, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { AnnotationStore, FlexiMatcher, splitPattern } from "../dist/browser.js";
+import {
+  AnnotationStore,
+  FlexiMatcher,
+  splitPattern,
+} from "../dist/browser.js";
 import {
   loadWiktionaryLexicon,
   registerWiktionaryRules,
@@ -29,7 +34,8 @@ const here = fileURLToPath(new URL(".", import.meta.url));
 const repoRoot = resolve(here, "..");
 const staticDir = resolve(here, "frontend", "dist");
 const lexiconPath =
-  process.env.WIKTIONARY_LEXICON ?? resolve(repoRoot, "data/wiktionary-it.jsonl.gz");
+  process.env.WIKTIONARY_LEXICON ??
+  resolve(repoRoot, "data/wiktionary-it.jsonl.gz");
 const port = Number.parseInt(process.env.PORT ?? "8787", 10);
 const VERSION = "0.1.0";
 
@@ -86,7 +92,9 @@ function literalPatternChunks(pattern) {
     return new Set();
   }
   try {
-    return new Set(splitPattern(pattern).filter((chunk) => !chunk.startsWith("[")));
+    return new Set(
+      splitPattern(pattern).filter((chunk) => !chunk.startsWith("[")),
+    );
   } catch {
     return new Set();
   }
@@ -119,7 +127,9 @@ function validateTags(tags) {
       typeof tag.pattern !== "string" ||
       typeof tag.identifier !== "string"
     ) {
-      throw new Error(`tags[${index}] needs tag, pattern and identifier strings`);
+      throw new Error(
+        `tags[${index}] needs tag, pattern and identifier strings`,
+      );
     }
     return {
       tag: tag.tag,
@@ -282,7 +292,7 @@ npm run build</pre>
 </html>`;
 }
 
-async function serveStatic(request, response, url) {
+async function serveStatic(response, url) {
   if (!existsSync(staticDir)) {
     const body = staticMessage();
     response.writeHead(200, {
@@ -302,7 +312,8 @@ async function serveStatic(request, response, url) {
     return;
   }
 
-  const relative = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const relative =
+    pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
   let filePath = resolve(staticDir, relative);
   if (filePath !== staticDir && !filePath.startsWith(`${staticDir}${sep}`)) {
     response.writeHead(403);
@@ -341,7 +352,10 @@ async function serveStatic(request, response, url) {
 }
 
 async function handle(request, response) {
-  const url = new URL(request.url ?? "/", `http://${request.headers.host ?? "localhost"}`);
+  const url = new URL(
+    request.url ?? "/",
+    `http://${request.headers.host ?? "localhost"}`,
+  );
 
   if (request.method === "OPTIONS") {
     response.writeHead(204, {
@@ -392,7 +406,7 @@ async function handle(request, response) {
     return;
   }
 
-  await serveStatic(request, response, url);
+  await serveStatic(response, url);
 }
 
 const server = createServer((request, response) => {
@@ -410,7 +424,9 @@ await loadLexicon();
 server.listen(port, () => {
   console.log(`Fleximatcher playground: http://localhost:${port}`);
   if (!existsSync(staticDir)) {
-    console.log("Frontend not built yet; API is available and the page shows build instructions.");
+    console.log(
+      "Frontend not built yet; API is available and the page shows build instructions.",
+    );
   }
 });
 

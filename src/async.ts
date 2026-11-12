@@ -108,7 +108,10 @@ export async function prefetchAsyncRules(
   bindings: readonly AsyncRuleBinding[],
 ): Promise<PrefetchedRules> {
   const previous = new Map<string, RuleFactory | undefined>();
-  const caches = new Map<string, Map<string, readonly AsyncAnnotationInput[]>>();
+  const caches = new Map<
+    string,
+    Map<string, readonly AsyncAnnotationInput[]>
+  >();
 
   try {
     for (const binding of bindings) {
@@ -122,10 +125,7 @@ export async function prefetchAsyncRules(
       >;
       const parameters = binding.parameters ?? [""];
       for (const parameter of parameters) {
-        cache.set(
-          parameter,
-          await binding.factory.analyze(text, parameter),
-        );
+        cache.set(parameter, await binding.factory.analyze(text, parameter));
       }
     }
 

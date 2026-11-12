@@ -14,12 +14,12 @@
  */
 
 export {
-  WiktionaryLexicon,
-  createWiktionaryEntry,
   type CompactWiktionaryEntry,
+  createWiktionaryEntry,
   type FullWiktionaryEntryInput,
   type WiktionaryEntry,
   type WiktionaryEntryInput,
+  WiktionaryLexicon,
   type WiktionaryLexiconData,
   type WiktionaryLexiconLoadOptions,
 } from "./lexicon.js";
@@ -38,16 +38,16 @@ export {
   type WiktionaryQuery,
 } from "./query.js";
 export {
+  type RegisterWiktionaryOptions,
+  registerWiktionaryRules,
   WiktionaryRule,
   WiktionaryRuleFactory,
-  registerWiktionaryRules,
-  type RegisterWiktionaryOptions,
   type WiktionaryRuleOptions,
 } from "./rules.js";
 export { tokenizeWords, type WordToken } from "./tokenize.js";
 export {
-  transformEntry,
   type LexiconEntry,
+  transformEntry,
   type WiktextractEntry,
   type WiktextractForm,
   type WiktextractFormOf,

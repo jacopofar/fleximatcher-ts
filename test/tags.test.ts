@@ -24,9 +24,13 @@ describe("tags", () => {
       },
     });
 
-    const result = matcher.matches("the dog eats a pear", "the dog eats [tag:fruit]", {
-      populateResult: true,
-    });
+    const result = matcher.matches(
+      "the dog eats a pear",
+      "the dog eats [tag:fruit]",
+      {
+        populateResult: true,
+      },
+    );
     expect(result.matching).toBe(true);
     const interpretation = result.interpretations?.[0];
     expect(interpretation).toBeDefined();
@@ -49,7 +53,9 @@ describe("tags", () => {
       template: "{'inner':${1.name},'article':'${0}','kind':'${1.kind}'}",
     });
 
-    const result = matcher.matches("a pear", "[tag:fruit]", { populateResult: true });
+    const result = matcher.matches("a pear", "[tag:fruit]", {
+      populateResult: true,
+    });
     const tag = result.interpretations?.[0]?.[0];
     expect(tag?.data).toEqual({ inner: "pear", article: "a ", kind: "fruit" });
   });
@@ -68,7 +74,9 @@ describe("tags", () => {
       },
     });
 
-    const result = matcher.matches("42", "[tag:pair]", { populateResult: true });
+    const result = matcher.matches("42", "[tag:pair]", {
+      populateResult: true,
+    });
     const tag = result.interpretations?.[0]?.[0];
     expect(tag?.data).toEqual({ value: 4, words: ["four"] });
   });
@@ -84,8 +92,12 @@ describe("tags", () => {
       }),
     });
 
-    const result = matcher.matches("hello", "[tag:word]", { populateResult: true });
-    const tags = (result.interpretations ?? []).map((sequence) => sequence[0]?.data);
+    const result = matcher.matches("hello", "[tag:word]", {
+      populateResult: true,
+    });
+    const tags = (result.interpretations ?? []).map(
+      (sequence) => sequence[0]?.data,
+    );
     expect(tags).toContainEqual({ text: "hello", upper: "HELLO", length: 1 });
   });
 
@@ -136,7 +148,10 @@ describe("tags", () => {
   });
 
   it("can throw when the nesting limit is reached", () => {
-    const matcher = new FlexiMatcher({ maximumTagNesting: 1, throwOnMaxDepth: true });
+    const matcher = new FlexiMatcher({
+      maximumTagNesting: 1,
+      throwOnMaxDepth: true,
+    });
     matcher.addTagRule("loop", "y", { identifier: "base" });
     matcher.addTagRule("loop", "x [tag:loop]", { identifier: "recursive" });
 
@@ -161,9 +176,9 @@ describe("tags", () => {
 
   it("removes and clears tag productions", () => {
     const matcher = new FlexiMatcher();
-    expect(
-      matcher.addTagRule("fruit", "pear", { identifier: "id_pear" }),
-    ).toBe(false);
+    expect(matcher.addTagRule("fruit", "pear", { identifier: "id_pear" })).toBe(
+      false,
+    );
     expect(matcher.tagNames).toContain("fruit");
     expect(matcher.tagDefinitions("fruit")).toHaveLength(1);
     expect(matcher.getTagRule("fruit", "id_pear")?.pattern).toBe("pear");
@@ -176,7 +191,9 @@ describe("tags", () => {
 
     expect(matcher.removeTagRule("fruit", "id_pear")).toBe(true);
     expect(matcher.tagNames).not.toContain("fruit");
-    expect(() => matcher.removeTagRule("fruit", "id_pear")).toThrow(UnknownTagError);
+    expect(() => matcher.removeTagRule("fruit", "id_pear")).toThrow(
+      UnknownTagError,
+    );
 
     matcher.addTagRule("fruit", "pear", { identifier: "id_pear" });
     matcher.clearTags();
@@ -219,7 +236,9 @@ describe("tags", () => {
     });
     const data = result.store
       .ofType<{ value: number }>("[tag:number]")
-      .find((annotation) => annotation.start === 0 && annotation.end === 2)?.data;
+      .find(
+        (annotation) => annotation.start === 0 && annotation.end === 2,
+      )?.data;
     expect(data?.value).toBe(42);
 
     matcher.addTagRule("bad", "[r:\\d+]", {
@@ -269,7 +288,9 @@ describe("tags", () => {
     const matcher = new FlexiMatcher();
     matcher.addTagRule("fruit", "pear", { template: { name: "pear" } });
     expect(matcher.tagDefinitions("fruit")[0]?.identifier).toBeNull();
-    const result = matcher.matches("pear", "[tag:fruit]", { populateResult: true });
+    const result = matcher.matches("pear", "[tag:fruit]", {
+      populateResult: true,
+    });
     expect(result.interpretations?.[0]?.[0]?.data).toEqual({ name: "pear" });
   });
 
@@ -282,13 +303,17 @@ describe("tags", () => {
     expect(matcher.addTagDefinition("fruit", definition)).toBe(false);
     expect(matcher.getTagRule("fruit", "id_pear")).toBe(definition);
 
-    const result = matcher.matches("pear", "[tag:fruit]", { populateResult: true });
+    const result = matcher.matches("pear", "[tag:fruit]", {
+      populateResult: true,
+    });
     expect(result.interpretations?.[0]?.[0]?.data).toEqual({ name: "pear" });
   });
 
   it("rejects direct self-reference and empty productions", () => {
     const matcher = new FlexiMatcher();
-    expect(() => matcher.addTagRule("fruit", "[tag:fruit]")).toThrow(PatternError);
+    expect(() => matcher.addTagRule("fruit", "[tag:fruit]")).toThrow(
+      PatternError,
+    );
     expect(() => matcher.addTagRule("fruit", "")).toThrow(PatternError);
     expect(() => matcher.addTagRule("", "pear")).toThrow(PatternError);
   });

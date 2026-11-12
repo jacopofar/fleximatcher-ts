@@ -67,7 +67,13 @@ bench("annotate: 5 rules (2 KB text)", 50 * scale, () => {
   return {
     run() {
       matcher.annotate(text, {
-        rules: ["[r:[A-Z][a-z]+]", "[r:[a-z]+]", "[i:Le]", "[i:case]", "[i:belle]"],
+        rules: [
+          "[r:[A-Z][a-z]+]",
+          "[r:[a-z]+]",
+          "[i:Le]",
+          "[i:case]",
+          "[i:belle]",
+        ],
         fullyAnnotate: true,
       });
     },
@@ -153,7 +159,12 @@ bench("tokenizer: 2 KB Italian text", 100 * scale, () => {
 });
 
 const width = Math.max(...results.map((result) => result.name.length));
-console.log("benchmark".padEnd(width), "iterations".padStart(12), "total ms".padStart(10), "ops/sec".padStart(12));
+console.log(
+  "benchmark".padEnd(width),
+  "iterations".padStart(12),
+  "total ms".padStart(10),
+  "ops/sec".padStart(12),
+);
 console.log("-".repeat(width + 38));
 for (const result of results) {
   console.log(

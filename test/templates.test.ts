@@ -22,7 +22,9 @@ describe("annotation templates", () => {
   });
 
   it("supports value-position placeholders in string templates", () => {
-    const template = new AnnotationTemplate("{'name':${1.name},'count':${1.count}}");
+    const template = new AnnotationTemplate(
+      "{'name':${1.name},'count':${1.count}}",
+    );
     expect(template.build(text, [first, second])).toEqual({
       name: "pear",
       count: 3,
@@ -30,7 +32,9 @@ describe("annotation templates", () => {
   });
 
   it("escapes placeholders inside quoted strings", () => {
-    const template = new AnnotationTemplate("{'covered':'${0}','name':'${1.name}'}");
+    const template = new AnnotationTemplate(
+      "{'covered':'${0}','name':'${1.name}'}",
+    );
     expect(template.build(text, [first, second])).toEqual({
       covered: "a ",
       name: "pear",
@@ -54,7 +58,9 @@ describe("annotation templates", () => {
   });
 
   it("accepts lenient JSON with single quotes and bare values", () => {
-    const template = new AnnotationTemplate("{name:pear,flag:true,nothing:null}");
+    const template = new AnnotationTemplate(
+      "{name:pear,flag:true,nothing:null}",
+    );
     expect(template.build(text, [first, second])).toEqual({
       name: "pear",
       flag: true,
@@ -119,7 +125,9 @@ describe("annotation templates", () => {
   });
 
   it("rejects invalid or out-of-range placeholders at build time", () => {
-    expect(() => new AnnotationTemplate("${1.bad..path}")).toThrow(AnnotationError);
+    expect(() => new AnnotationTemplate("${1.bad..path}")).toThrow(
+      AnnotationError,
+    );
     expect(() =>
       new AnnotationTemplate("${9.name}").build(text, [first, second]),
     ).toThrow(AnnotationError);
@@ -133,6 +141,8 @@ describe("annotation templates", () => {
 
   it("rejects asynchronous function templates", () => {
     const template = new AnnotationTemplate(async () => ({ ok: true }));
-    expect(() => template.build(text, [first, second])).toThrow(AnnotationError);
+    expect(() => template.build(text, [first, second])).toThrow(
+      AnnotationError,
+    );
   });
 });

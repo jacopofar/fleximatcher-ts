@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+
 /** Command line interface: a small demo and a one-shot matcher. */
 
-import { parseArgs } from "node:util";
 import { pathToFileURL } from "node:url";
+import { parseArgs } from "node:util";
 
 import { FlexiMatcher } from "./matcher.js";
 import { readTagsFromTsv } from "./tsv.js";
@@ -33,7 +34,10 @@ function demo(): void {
   console.log(`match:   ${result.matching}`);
   for (const interpretation of result.interpretations ?? []) {
     for (const annotation of interpretation) {
-      const data = annotation.data === undefined ? "" : ` -> ${JSON.stringify(annotation.data)}`;
+      const data =
+        annotation.data === undefined
+          ? ""
+          : ` -> ${JSON.stringify(annotation.data)}`;
       console.log(
         `  ${annotation.type.padEnd(14)} [${annotation.start}:${annotation.end}] ${JSON.stringify(text.slice(annotation.start, annotation.end))}${data}`,
       );
@@ -90,20 +94,24 @@ function usage(): string {
 }
 
 /** Entry point for the `fleximatcher` console script. */
+function parseCliArgs(argv: string[]) {
+  return parseArgs({
+    args: argv,
+    allowPositionals: true,
+    options: {
+      contains: { type: "boolean", default: false },
+      explain: { type: "boolean", default: false },
+      tags: { type: "string" },
+      demo: { type: "boolean", default: false },
+      help: { type: "boolean", default: false },
+    },
+  });
+}
+
 export function main(argv: string[] = process.argv.slice(2)): number {
-  let parsed;
+  let parsed: ReturnType<typeof parseCliArgs>;
   try {
-    parsed = parseArgs({
-      args: argv,
-      allowPositionals: true,
-      options: {
-        contains: { type: "boolean", default: false },
-        explain: { type: "boolean", default: false },
-        tags: { type: "string" },
-        demo: { type: "boolean", default: false },
-        help: { type: "boolean", default: false },
-      },
-    });
+    parsed = parseCliArgs(argv);
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     console.error(usage());
@@ -137,6 +145,9 @@ export function main(argv: string[] = process.argv.slice(2)): number {
 }
 
 const invokedPath = process.argv[1];
-if (invokedPath !== undefined && import.meta.url === pathToFileURL(invokedPath).href) {
+if (
+  invokedPath !== undefined &&
+  import.meta.url === pathToFileURL(invokedPath).href
+) {
   process.exit(main());
 }

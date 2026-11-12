@@ -11,8 +11,8 @@
  * store of the match that invoked them while independent calls stay isolated.
  */
 
-import { RuleError } from "./errors.js";
 import { Budget } from "./budget.js";
+import { RuleError } from "./errors.js";
 import type { CompiledPattern, FlexiMatcher } from "./matcher.js";
 
 /** A deterministic string key for arbitrary JSON-like annotation data. */
@@ -29,7 +29,9 @@ export function stableKey(value: unknown): string {
       case "string":
         return JSON.stringify(current);
       case "number":
-        return Number.isFinite(current) ? String(current) : JSON.stringify(String(current));
+        return Number.isFinite(current)
+          ? String(current)
+          : JSON.stringify(String(current));
       case "boolean":
         return current ? "true" : "false";
       case "bigint":
@@ -54,7 +56,10 @@ export function stableKey(value: unknown): string {
     seen.add(current);
     const keys = Object.keys(current).sort();
     const result = `{${keys
-      .map((key) => `${JSON.stringify(key)}:${walk((current as Record<string, unknown>)[key])}`)
+      .map(
+        (key) =>
+          `${JSON.stringify(key)}:${walk((current as Record<string, unknown>)[key])}`,
+      )
       .join(",")}}`;
     seen.delete(current);
     return result;
@@ -80,7 +85,9 @@ export class Annotation<TData = unknown> {
 
   constructor(start: number, end: number, type: string, data?: TData) {
     if (!Number.isInteger(start) || start < 0) {
-      throw new RangeError(`Annotation start must be a non-negative integer, got ${start}`);
+      throw new RangeError(
+        `Annotation start must be a non-negative integer, got ${start}`,
+      );
     }
     if (!Number.isInteger(end) || end <= start) {
       throw new RangeError(
@@ -107,11 +114,17 @@ export class Annotation<TData = unknown> {
   }
 
   toJSON(): { start: number; end: number; type: string; data?: unknown } {
-    return { start: this.start, end: this.end, type: this.type, data: this.data };
+    return {
+      start: this.start,
+      end: this.end,
+      type: this.type,
+      data: this.data,
+    };
   }
 
   toString(): string {
-    const suffix = this.data === undefined ? "" : ` => ${JSON.stringify(this.data)}`;
+    const suffix =
+      this.data === undefined ? "" : ` => ${JSON.stringify(this.data)}`;
     return `Annotation(${this.start}:${this.end}, ${JSON.stringify(this.type)}${suffix})`;
   }
 }
@@ -334,7 +347,10 @@ export class AnnotationStore implements Iterable<Annotation> {
     if (this.seen.has(annotation.key)) {
       return false;
     }
-    if (this.maxAnnotations !== undefined && this.all.length >= this.maxAnnotations) {
+    if (
+      this.maxAnnotations !== undefined &&
+      this.all.length >= this.maxAnnotations
+    ) {
       this.truncated = true;
       return false;
     }
@@ -358,7 +374,12 @@ export class AnnotationStore implements Iterable<Annotation> {
   }
 
   /** Create and add an annotation; return `true` when it was new. */
-  addAnnotation(start: number, end: number, type: string, data?: unknown): boolean {
+  addAnnotation(
+    start: number,
+    end: number,
+    type: string,
+    data?: unknown,
+  ): boolean {
     return this.add(new Annotation(start, end, type, data));
   }
 
@@ -463,7 +484,9 @@ export class AnnotationStore implements Iterable<Annotation> {
     for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
       const part = parts[partIndex] as string;
       const newPositions = new Set<number>();
-      const newCandidates: CandidateMap | null = populateResult ? new Map() : null;
+      const newCandidates: CandidateMap | null = populateResult
+        ? new Map()
+        : null;
       let stageCount = 0;
       const canAdd = (): boolean => {
         if (
@@ -483,7 +506,10 @@ export class AnnotationStore implements Iterable<Annotation> {
           // continue at the same position.
           newPositions.add(start);
           if (populateResult) {
-            const target = newCandidates as Map<number, Map<string, Annotation[]>>;
+            const target = newCandidates as Map<
+              number,
+              Map<string, Annotation[]>
+            >;
             let bucket = target.get(start);
             if (bucket === undefined) {
               bucket = new Map();
@@ -519,7 +545,10 @@ export class AnnotationStore implements Iterable<Annotation> {
             continue;
           }
 
-          const target = newCandidates as Map<number, Map<string, Annotation[]>>;
+          const target = newCandidates as Map<
+            number,
+            Map<string, Annotation[]>
+          >;
           let bucket = target.get(annotation.end);
           if (bucket === undefined) {
             bucket = new Map();
@@ -571,7 +600,9 @@ export class AnnotationStore implements Iterable<Annotation> {
       firstStep = false;
     }
 
-    const matching = matchWhole ? startPositions.has(length) : startPositions.size > 0;
+    const matching = matchWhole
+      ? startPositions.has(length)
+      : startPositions.size > 0;
     if (!matching) {
       const last = parts.length - 1;
       return {
@@ -728,7 +759,8 @@ export class MatchResult {
     if (this.emptyMatch) {
       return "MatchResult(empty match)";
     }
-    const count = this.interpretations === undefined ? "?" : this.interpretations.length;
+    const count =
+      this.interpretations === undefined ? "?" : this.interpretations.length;
     return `MatchResult(match, interpretations=${count})`;
   }
 }
@@ -747,7 +779,11 @@ export class MatchFrame {
   readonly parent: MatchFrame | null;
   readonly depth: number;
 
-  constructor(matcher: string, annotationsAtCreation: number, parent: MatchFrame | null = null) {
+  constructor(
+    matcher: string,
+    annotationsAtCreation: number,
+    parent: MatchFrame | null = null,
+  ) {
     this.matcher = matcher;
     this.annotationsAtCreation = annotationsAtCreation;
     this.parent = parent;
