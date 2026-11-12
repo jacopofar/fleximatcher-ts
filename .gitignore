@@ -7,7 +7,8 @@ coverage/
 # Local working notes
 notes.md
 
-# Generated Wiktionary lexicons
-data/
+# Generated Wiktionary lexicons and the raw dump
+data/*
+!data/README.md
 *.jsonl
 *.jsonl.gz

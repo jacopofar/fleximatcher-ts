@@ -438,7 +438,10 @@ console.log(result.interpretations?.[0]?.[0]?.data);
 
 The optional `fleximatcher/wiktionary` module turns a
 [wiktextract](https://github.com/tatuylonen/wiktextract) dump into a compact
-lexicon and exposes word-class and inflection annotators.
+lexicon and exposes word-class and inflection annotators.  The dump itself is
+an input you download, not part of the package; see
+[`tools/wiktextract/README.md`](./tools/wiktextract/README.md) for what it is,
+where to get it, and the credits and data license attached to it.
 
 ```ts
 import { FlexiMatcher } from "fleximatcher";
@@ -510,10 +513,14 @@ The builder streams the raw dump and writes gzipped NDJSON:
 ```sh
 npm run build
 node dist/wiktionary/build.js \
-  --input ../wiktionary-web/raw-wiktextract-data.jsonl.gz \
+  --input data/raw-wiktextract-data.jsonl.gz \
   --output data/wiktionary-it.jsonl.gz \
   --language it --language-name Italian
 ```
+
+The raw dump (~2.9 GB gzipped) is not committed.  Download it from kaikki.org
+as described in [`tools/wiktextract/README.md`](./tools/wiktextract/README.md),
+which also carries the wiktextract credits and the Wiktionary data license.
 
 Or, after installing the package:
 

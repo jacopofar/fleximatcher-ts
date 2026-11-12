@@ -3,12 +3,15 @@
 /**
  * Build a compact Wiktionary lexicon from a raw wiktextract JSONL dump.
  *
+ * The dump itself is not part of the repository; see
+ * `tools/wiktextract/README.md` for where to download it.
+ *
  * Example:
  *
  * ```sh
  * npm run build
  * node dist/wiktionary/build.js \
- *   --input ../wiktionary-web/raw-wiktextract-data.jsonl.gz \
+ *   --input data/raw-wiktextract-data.jsonl.gz \
  *   --output data/wiktionary-it.jsonl.gz \
  *   --language it
  * ```

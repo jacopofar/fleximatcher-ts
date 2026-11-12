@@ -64,10 +64,14 @@ Generate it from the wiktextract dump with:
 ```sh
 npm run build
 node dist/wiktionary/build.js \
-  --input ../wiktionary-web/raw-wiktextract-data.jsonl.gz \
+  --input data/raw-wiktextract-data.jsonl.gz \
   --output data/wiktionary-it.jsonl.gz \
   --language it --language-name Italian
 ```
+
+The raw dump is not committed; see
+[`../tools/wiktextract/README.md`](../tools/wiktextract/README.md) for where to
+download it.
 
 ## Development
 

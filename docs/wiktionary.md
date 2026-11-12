@@ -44,10 +44,15 @@ The builder streams the raw dump and writes gzipped NDJSON:
 ```sh
 npm run build
 node dist/wiktionary/build.js \
-  --input ../wiktionary-web/raw-wiktextract-data.jsonl.gz \
+  --input data/raw-wiktextract-data.jsonl.gz \
   --output data/wiktionary-it.jsonl.gz \
   --language it --language-name Italian
 ```
+
+The raw dump (~2.9 GB gzipped, every language of English Wiktionary) is not
+committed.  Download it from kaikki.org as described in
+[`tools/wiktextract/README.md`](../tools/wiktextract/README.md), which also records
+the credits and the data license.
 
 Or, after installing the package:
 

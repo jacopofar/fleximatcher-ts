@@ -11,7 +11,9 @@ the Wiktionary annotators, the web UI and concrete annotation use cases.
 | [playground.md](./playground.md) | the Vite/Node playground, client and server modes, controls, flame hierarchy, API and development workflow |
 | [use-cases.md](./use-cases.md) | practical annotation recipes: POS highlighting, concordances, morphological search, agreement checks, noun-phrase grammars, explainable parsing and custom rule integration |
 
-Runnable examples live in [`../examples`](../examples/README.md).
+Runnable examples live in [`../examples`](../examples/README.md).  The raw
+wiktextract input, its credits and the data license are documented in
+[`../tools/wiktextract/README.md`](../tools/wiktextract/README.md).
 
 ## The mental model in one page
 
