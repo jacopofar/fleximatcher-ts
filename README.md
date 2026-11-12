@@ -1,12 +1,17 @@
 # fleximatcher
 
-Annotate and bottom-up parse natural language text with composable rules and
-tags.  This is a TypeScript reimplementation of the archived
-[Java library of the same name](https://github.com/jacopofar/fleximatcher),
-influenced by the Python port that lived alongside it.
+
+Text annotator and bottom-up parser for natural language text with composable
+recursive rules and custom annotators.
+
+This is a Typescript port/rewrite/extension of my [old project from 2014](https://github.com/jacopofar/fleximatcher)
 
 The library is deliberately small: no runtime dependencies, no NLP models, no
-tokenizer.  You bring the language-specific pieces (POS taggers, gazetteers,
+tokenizer, so it can run in the browser. However, it includes tooling to use a
+lexical database (wiktionary/wiktextract) and build rules to match specific
+inflections, parts of speech, etc.
+
+You bring the language-specific pieces (POS taggers, gazetteers,
 tokenizers, embeddings, …) as *rules*, and fleximatcher combines them into
 patterns and recursive grammars.
 
@@ -48,7 +53,7 @@ declarations.
 
 ## Documentation
 
-The deep documentation lives in [`docs/`](./docs/README.md):
+See [`docs/`](./docs/README.md):
 
 - [`docs/annotations.md`](./docs/annotations.md) — annotation model, stores,
   matching, interpretations, budgets, ranking, custom rules, typed schemas,
